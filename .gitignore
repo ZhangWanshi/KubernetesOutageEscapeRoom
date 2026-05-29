@@ -35,6 +35,7 @@ build/
 
 # Log files
 *.log
+*.err
 
 # Crash dumps
         ### Linux / Mac OS X ###
