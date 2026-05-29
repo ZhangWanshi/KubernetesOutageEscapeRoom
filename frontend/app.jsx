@@ -21,13 +21,14 @@ function App() {
   const [submitting, setSubmitting] = React.useState(false);
   const [finalResult, setFinalResult] = React.useState(null);
   const [players, setPlayers] = React.useState([]);
+  const [hintText, setHintText] = React.useState("");
 
   React.useEffect(() => {
     if (screen !== "room" || !sessionId) return;
     async function fetchPlayers() {
       try {
-        const data = await apiRequest(`/sessions/${encodeURIComponent(sessionId)}/players`);
-        setPlayers(Array.isArray(data) ? data : []);
+        const data = await apiRequest(`/sessions/${encodeURIComponent(sessionId)}/state`);
+        if (data.players) setPlayers(data.players.map(p => p.name ?? p));
       } catch (_) {}
     }
     fetchPlayers();
@@ -61,43 +62,23 @@ function App() {
 
     try {
       let activeSessionId = "";
-      let isNewSession = false;
-      const trimmedRoomNumber = parseInt(trimmedSession, 10);
 
       if (!trimmedSession) {
-        const createData = await apiRequest("/sessions", {
-          method: "POST",
-          body: { playerName: trimmedName },
-        });
-
-        activeSessionId = extractSessionId(createData);
-
-        if (!activeSessionId) {
-          throw new Error("The backend did not return a sessionId.");
-        }
-        isNewSession = true;
-        if (createData.roomNumber) setRoomNumber(createData.roomNumber);
-      } else if (!isNaN(trimmedRoomNumber)) {
-        const sessionData = await apiRequest(`/sessions/by-room/${trimmedRoomNumber}`);
-        activeSessionId = extractSessionId(sessionData);
-        if (!activeSessionId) throw new Error("Room not found.");
-        setRoomNumber(trimmedRoomNumber);
+        const createData = await apiRequest("/sessions", { method: "POST" });
+        activeSessionId = createData.sessionCode;
+        if (!activeSessionId) throw new Error("The backend did not return a sessionCode.");
+        updateGameState(createData);
       } else {
-        throw new Error("Please enter a valid room number.");
+        activeSessionId = trimmedSession.trim().toUpperCase();
       }
 
       setSessionId(activeSessionId);
 
-      if (!isNewSession) {
-        const joinData = await apiRequest(
-          `/sessions/${encodeURIComponent(activeSessionId)}/join`,
-          {
-            method: "POST",
-            body: { playerName: trimmedName },
-          }
-        );
-        updateGameState(joinData);
-      }
+      const joinData = await apiRequest(
+        `/sessions/${encodeURIComponent(activeSessionId)}/join`,
+        { method: "POST", body: { playerName: trimmedName } }
+      );
+      updateGameState(joinData);
 
       await fetchCurrentRoom(activeSessionId);
       setScreen("intro");
@@ -106,22 +87,14 @@ function App() {
     }
   }
 
-  async function fetchCurrentRoom(activeSessionId = sessionId) {
+  async function fetchCurrentRoom(activeSessionId = sessionId, roomId = null) {
     try {
-      const roomData = await apiRequest(
-        `/sessions/${encodeURIComponent(activeSessionId)}/room`
-      );
-
-      updateGameState(roomData);
-
-      const normalisedRoom = normaliseRoom(
-        roomData.room ?? roomData.currentRoom ?? roomData
-      );
-
-      if (!normalisedRoom) {
-        throw new Error("The backend did not return a valid room.");
-      }
-
+      const stateData = await apiRequest(`/sessions/${encodeURIComponent(activeSessionId)}/state`);
+      updateGameState(stateData);
+      const currentRoomId = roomId ?? stateData.currentRoomId ?? 1;
+      const roomData = await apiRequest(`/rooms/${currentRoomId}`);
+      const normalisedRoom = normaliseRoom(roomData);
+      if (!normalisedRoom) throw new Error("The backend did not return a valid room.");
       setRoom(normalisedRoom);
       setResultMessage("");
       setSubmitting(false);
@@ -134,10 +107,13 @@ function App() {
 
   async function useHint() {
     try {
-      const newHealth = await apiRequest(`/sessions/${encodeURIComponent(sessionId)}/hint`, {
-        method: "POST",
-      });
-      setHealth(newHealth);
+      const result = await apiRequest(
+        `/sessions/${encodeURIComponent(sessionId)}/rooms/${room.id}/hint`,
+        { method: "POST", body: { playerName } }
+      );
+      if (result.serviceHealth !== undefined) setHealth(result.serviceHealth);
+      if (result.score !== undefined) setScore(result.score);
+      if (result.hint) setHintText(result.hint);
       return true;
     } catch (error) {
       return false;
@@ -152,34 +128,22 @@ function App() {
 
     try {
       const result = await apiRequest(
-        `/sessions/${encodeURIComponent(sessionId)}/submit`,
+        `/sessions/${encodeURIComponent(sessionId)}/rooms/${room.id}/submit`,
         {
           method: "POST",
           body: {
             playerName,
-            roomId: room.id,
-            answer: actionId,
+            selectedActionId: actionId,
           },
         }
       );
 
-      const correct = Boolean(
-        result.correct ??
-        result.isCorrect ??
-        result.success ??
-        (result.status === "CORRECT" || result.status === "correct")
-      );
-
-      const finished = Boolean(
-        result.finished ??
-        result.gameFinished ??
-        result.completed ??
-        result.finalRoomComplete ??
-        result.status === "COMPLETED"
-      );
+      const correct = Boolean(result.correct);
+      const finished = Boolean(result.completed);
 
       if (correct) {
         if (result.score !== undefined) setScore(result.score);
+        if (result.serviceHealth !== undefined) setHealth(result.serviceHealth);
         setResultType("success");
         setResultMessage("Correct. Transporting to the next area...");
 
@@ -196,9 +160,10 @@ function App() {
           }, 1200);
         }
       } else {
-        if (result.health !== undefined) setHealth(result.health);
+        if (result.serviceHealth !== undefined) setHealth(result.serviceHealth);
+        if (result.score !== undefined) setScore(result.score);
         setResultType("danger");
-        setResultMessage(`Incorrect. Health: ${result.health ?? health - 20}`);
+        setResultMessage(`Incorrect. Health: ${result.serviceHealth ?? health}`);
         setSubmitting(false);
       }
     } catch (error) {
@@ -210,51 +175,27 @@ function App() {
 
   async function fetchFinalResult() {
     try {
-      const result = await apiRequest(
-        `/sessions/${encodeURIComponent(sessionId)}/result`
-      );
-
+      const result = await apiRequest(`/sessions/${encodeURIComponent(sessionId)}/report`);
       updateGameState(result);
       setFinalResult(result);
       setScreen("final");
     } catch (error) {
-      setFinalResult({
-        score,
-        health,
-        message: error.message,
-      });
+      setFinalResult({ score, health, message: error.message });
       setScreen("final");
     }
   }
 
   function updateGameState(data) {
     if (!data || typeof data !== "object") return;
-
-    if (data.sessionId !== undefined || data.id !== undefined) {
-      setSessionId(data.sessionId ?? data.id);
+    if (data.sessionCode !== undefined) setSessionId(data.sessionCode);
+    const score = data.score ?? data.finalScore;
+    if (score !== undefined) setScore(score);
+    if (data.serviceHealth !== undefined) setHealth(data.serviceHealth);
+    if (data.currentRoomId !== undefined) {
+      setCurrentRoomIndex(data.currentRoomId - 1);
+      setRoomNumber(data.currentRoomId);
     }
-
-    if (data.score !== undefined || data.currentScore !== undefined) {
-      setScore(data.score ?? data.currentScore);
-    }
-
-    if (data.health !== undefined || data.serviceHealth !== undefined) {
-      setHealth(data.health ?? data.serviceHealth);
-    }
-
-    if (
-      data.currentRoomIndex !== undefined ||
-      data.roomIndex !== undefined ||
-      data.roomNumber !== undefined
-    ) {
-      setCurrentRoomIndex(
-        data.currentRoomIndex ?? data.roomIndex ?? data.roomNumber - 1
-      );
-    }
-
-    if (data.totalRooms !== undefined || data.roomCount !== undefined) {
-      setTotalRooms(data.totalRooms ?? data.roomCount);
-    }
+    if (data.players !== undefined) setPlayers(data.players.map(p => p.name ?? p));
   }
 
   function resetGame() {
@@ -275,6 +216,7 @@ function App() {
     setResultType("success");
     setSubmitting(false);
     setFinalResult(null);
+    setHintText("");
   }
 
   return (
@@ -317,6 +259,9 @@ function App() {
           submitting={submitting}
           submitAction={submitAction}
           useHint={useHint}
+          hintText={hintText}
+          fetchCurrentRoom={fetchCurrentRoom}
+          fetchFinalResult={fetchFinalResult}
         />
       )}
 
@@ -401,13 +346,13 @@ function JoinScreen({
 
                 <div className="mb-3">
                   <label htmlFor="session-id" className="form-label">
-                    Room Number <span className="text-muted">(optional — join existing)</span>
+                    Session Code <span className="text-muted">(optional — join existing)</span>
                   </label>
                   <input
                     type="text"
                     id="session-id"
                     className="form-control"
-                    placeholder="Leave blank to create a new room"
+                    placeholder="Leave blank to create a new session"
                     value={sessionInput}
                     onChange={(event) => setSessionInput(event.target.value)}
                   />
@@ -508,6 +453,9 @@ function RoomScreen({
   submitting,
   submitAction,
   useHint,
+  hintText,
+  fetchCurrentRoom,
+  fetchFinalResult,
 }) {
   const progressPercent = Math.round((currentRoomIndex / totalRooms) * 100);
   const ROOM_THEMES = [
@@ -559,7 +507,7 @@ function RoomScreen({
             if (modalFinished) {
               await fetchFinalResult();
             } else {
-              await fetchCurrentRoom();
+              await fetchCurrentRoom(sessionId);
             }
           }}
         />
@@ -614,7 +562,7 @@ function RoomScreen({
                 </div>
               ) : (
                 <div className="hint-box">
-                  <p className="mb-0">{room.hint}</p>
+                  <p className="mb-0">{hintText}</p>
                 </div>
               )}
 
@@ -661,7 +609,7 @@ function RoomScreen({
                 <span className="me-2">{avatar}</span>{playerName}
               </p>
 
-              <p className="mb-1"><strong>Room Number:</strong></p>
+              <p className="mb-1"><strong>Session Code:</strong></p>
               <p id="session-display" className="mb-3 text-muted">{roomNumber}</p>
 
               <p className="mb-1"><strong>Players online:</strong> <span className="badge text-bg-success ms-1">{players.length}</span></p>
@@ -840,62 +788,34 @@ async function apiRequest(path, options = {}) {
   return data;
 }
 
-function extractSessionId(data) {
-  return (
-    data.sessionId ??
-    data.id ??
-    data.session?.id ??
-    data.session?.sessionId ??
-    null
-  );
-}
-
 function normaliseRoom(room) {
   if (!room || typeof room !== "object") return null;
 
   return {
-    id: room.id ?? room.roomId ?? room.number ?? 1,
-    title: room.title ?? room.roomTitle ?? "Jungle Outage Area",
-    problemDescription:
-      room.problemDescription ??
-      room.description ??
-      room.problem ??
-      "Inspect the evidence and choose the best remediation action.",
-    evidence: normaliseEvidence(
-      room.evidence ?? room.evidenceItems ?? room.clues ?? []
-    ),
-    actions: normaliseActions(
-      room.actions ?? room.possibleActions ?? room.options ?? []
-    ),
-    hint: room.hint ?? "No hint available.",
+    id: room.roomId ?? room.id ?? 1,
+    title: room.name ?? room.title ?? "Outage Area",
+    problemDescription: room.story ?? room.problemDescription ?? room.description ?? "Inspect the evidence and choose the best remediation action.",
+    evidence: normaliseEvidence(room.evidence ?? []),
+    actions: normaliseActions(room.actions ?? []),
   };
 }
 
 function normaliseEvidence(evidence) {
   if (!Array.isArray(evidence)) return [String(evidence)];
-
   return evidence.map((item) => {
     if (typeof item === "string") return item;
+    if (item.title && item.content) return `${item.title}: ${item.content}`;
     return item.text ?? item.description ?? item.value ?? JSON.stringify(item);
   });
 }
 
 function normaliseActions(actions) {
   if (!Array.isArray(actions)) return [];
-
   return actions.map((action, index) => {
-    if (typeof action === "string") {
-      return { id: action, label: action };
-    }
-
+    if (typeof action === "string") return { id: action, label: action };
     return {
-      id: action.id ?? action.actionId ?? action.value ?? `action-${index}`,
-      label:
-        action.label ??
-        action.name ??
-        action.description ??
-        action.text ??
-        `Action ${index + 1}`,
+      id: action.id ?? action.actionId ?? `action-${index}`,
+      label: action.text ?? action.label ?? action.name ?? action.description ?? `Action ${index + 1}`,
     };
   });
 }

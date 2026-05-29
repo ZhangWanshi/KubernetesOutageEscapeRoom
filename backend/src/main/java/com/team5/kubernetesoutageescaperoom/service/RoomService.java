@@ -1,6 +1,5 @@
 package com.team5.kubernetesoutageescaperoom.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team5.kubernetesoutageescaperoom.dto.ActionOptionDto;
 import com.team5.kubernetesoutageescaperoom.dto.EvidenceDto;
 import com.team5.kubernetesoutageescaperoom.dto.RoomDetailsDto;
@@ -9,27 +8,28 @@ import com.team5.kubernetesoutageescaperoom.exception.NotFoundException;
 import com.team5.kubernetesoutageescaperoom.model.ActionOption;
 import com.team5.kubernetesoutageescaperoom.model.Evidence;
 import com.team5.kubernetesoutageescaperoom.model.Room;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RoomService {
-    private static final int ROOM_1_ID = 1;
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoomService.class);
 
-    private final Room room1;
+    private final Map<Integer, Room> rooms;
 
-    public RoomService(ObjectMapper objectMapper) {
-        this.room1 = loadRoom1(objectMapper);
+    public RoomService() {
+        this.rooms = Map.of(
+            1, buildRoom1(),
+            2, buildRoom2()
+        );
     }
 
     public List<RoomSummaryDto> getRooms() {
-        return List.of(toSummary(room1));
+        return rooms.values().stream()
+                .sorted((a, b) -> Integer.compare(a.getRoomId(), b.getRoomId()))
+                .map(this::toSummary)
+                .toList();
     }
 
     public RoomDetailsDto getRoomDetails(int roomId) {
@@ -37,28 +37,77 @@ public class RoomService {
     }
 
     public Room getRoom(int roomId) {
-        if (roomId != ROOM_1_ID) {
-            throw new NotFoundException("Room not found");
-        }
-        return room1;
+        Room room = rooms.get(roomId);
+        if (room == null) throw new NotFoundException("Room not found");
+        return room;
     }
 
-    public boolean actionExists(String selectedActionId) {
-        return room1.getActions().stream()
+    public boolean actionExists(int roomId, String selectedActionId) {
+        Room room = rooms.get(roomId);
+        if (room == null) return false;
+        return room.getActions().stream()
                 .anyMatch(action -> action.getId().equalsIgnoreCase(selectedActionId));
     }
 
-    private Room loadRoom1(ObjectMapper objectMapper) {
-        ClassPathResource resource = new ClassPathResource("scenarios/room1.json");
-        if (resource.exists()) {
-            try {
-                return objectMapper.readValue(resource.getInputStream(), Room.class);
-            } catch (IOException exception) {
-                LOGGER.warn("Unable to load scenarios/room1.json. Falling back to built-in Room 1 data.", exception);
-                return fallbackRoom1();
-            }
-        }
-        return fallbackRoom1();
+    public int getTotalRooms() {
+        return rooms.size();
+    }
+
+    private Room buildRoom1() {
+        Room room = new Room();
+        room.setRoomId(1);
+        room.setName("Readiness Probe Failure");
+        room.setTheme("jungle");
+        room.setDifficulty("EASY");
+        room.setFailureArea("Kubernetes / Networking");
+        room.setTimeLimitSeconds(300);
+        room.setStory("The 5G network API pods are running but not receiving traffic.");
+        room.setEvidence(List.of(
+                new Evidence("LOG", "Readiness Probe Log", "Readiness probe failed: HTTP 503"),
+                new Evidence("STATUS", "Service Status", "Service has no ready endpoints"),
+                new Evidence("POD", "Pod Status", "Pod status: Running, but 0/1 ready")
+        ));
+        room.setActions(List.of(
+                new ActionOption("restart-pod", "Restart the pod"),
+                new ActionOption("fix-readiness-probe", "Fix the readiness probe configuration"),
+                new ActionOption("increase-memory", "Increase memory limits")
+        ));
+        room.setCorrectActionId("fix-readiness-probe");
+        room.setHints(List.of(
+                "Check the pod's readiness probe configuration. The probe is failing, preventing the pod from receiving traffic."
+        ));
+        room.setRootCause("The readiness probe was misconfigured and returning HTTP 503, causing the pod to be removed from service endpoints.");
+        room.setLearningPoint("A running pod is not necessarily a ready pod. Readiness probes control whether a pod receives traffic.");
+        return room;
+    }
+
+    private Room buildRoom2() {
+        Room room = new Room();
+        room.setRoomId(2);
+        room.setName("CrashLoopBackOff in the Desert");
+        room.setTheme("desert");
+        room.setDifficulty("MEDIUM");
+        room.setFailureArea("Kubernetes / Configuration");
+        room.setTimeLimitSeconds(300);
+        room.setStory("A critical payment service pod keeps restarting in the desert cluster.");
+        room.setEvidence(List.of(
+                new Evidence("STATUS", "Pod Status", "Pod status: CrashLoopBackOff"),
+                new Evidence("LOG", "Pod Logs", "kubectl logs: Error: DATABASE_URL environment variable not set"),
+                new Evidence("CONFIG", "ConfigMap Status", "ConfigMap 'payment-config' exists but is not mounted"),
+                new Evidence("SPEC", "Deployment Spec", "Deployment spec missing envFrom reference")
+        ));
+        room.setActions(List.of(
+                new ActionOption("restart-deployment", "Restart the deployment"),
+                new ActionOption("increase-cpu-limit", "Increase CPU limits"),
+                new ActionOption("mount-configmap", "Mount the ConfigMap into the deployment")
+        ));
+        room.setCorrectActionId("mount-configmap");
+        room.setHints(List.of(
+                "The pod is missing environment variables. Check if the ConfigMap exists and whether it's properly referenced in the deployment."
+        ));
+        room.setRootCause("The ConfigMap 'payment-config' existed but was never referenced in the deployment's envFrom, so DATABASE_URL was never injected.");
+        room.setLearningPoint("ConfigMaps must be explicitly mounted or referenced in a deployment spec — their existence alone does not make them available to pods.");
+        return room;
     }
 
     private RoomSummaryDto toSummary(Room room) {
@@ -92,39 +141,5 @@ public class RoomService {
 
     private ActionOptionDto toActionDto(ActionOption action) {
         return new ActionOptionDto(action.getId(), action.getText());
-    }
-
-    private Room fallbackRoom1() {
-        Room room = new Room();
-        room.setRoomId(1);
-        room.setName("Jungle Microservice Quest");
-        room.setTheme("jungle");
-        room.setDifficulty("EASY");
-        room.setFailureArea("Microservices / API");
-        room.setTimeLimitSeconds(300);
-        room.setStory("Users cannot place orders. The frontend is working, but the Order Service fails when checking stock with the Inventory Service.");
-        room.setEvidence(List.of(
-                new Evidence("SERVICE_MAP", "Service Dependency Map", "Frontend -> Order Service -> Inventory Service"),
-                new Evidence("API_RESPONSE", "Order API Response", "POST /api/orders returns HTTP 500: Unable to complete order"),
-                new Evidence("LOG", "Order Service Logs", "INFO Received order request for productId=45\nINFO Calling Inventory Service: http://inventory-service/inventory/check\nERROR Inventory check failed: 404 Not Found\nERROR Order could not be completed"),
-                new Evidence("API_DOC", "Inventory API Documentation", "Available endpoint: GET /api/inventory/check?productId={id}"),
-                new Evidence("CONFIG", "Order Service Config", "inventory.service.base-url=http://inventory-service\ninventory.service.check-path=/inventory/check")
-        ));
-        room.setActions(List.of(
-                new ActionOption("A", "Restart the Order Service pod"),
-                new ActionOption("B", "Increase memory limit for Order Service"),
-                new ActionOption("C", "Update Inventory Service API path to /api/inventory/check"),
-                new ActionOption("D", "Scale Inventory Service to 3 replicas"),
-                new ActionOption("E", "Delete and recreate the database")
-        ));
-        room.setCorrectActionId("C");
-        room.setHints(List.of(
-                "Both services are running. Look at API responses and logs.",
-                "The Order Service receives a 404 from Inventory Service.",
-                "Compare the endpoint in the logs with the Inventory API documentation."
-        ));
-        room.setRootCause("Order Service called /inventory/check, but Inventory Service exposes /api/inventory/check.");
-        room.setLearningPoint("In microservice systems, a service can be healthy but still fail due to an API contract or configuration mismatch.");
-        return room;
     }
 }

@@ -78,7 +78,7 @@ public class GameSessionService {
         Room room = roomService.getRoom(roomId);
         requireText(playerName, "playerName must not be blank");
         requireText(selectedActionId, "selectedActionId must not be blank");
-        if (!roomService.actionExists(selectedActionId.trim())) {
+        if (!roomService.actionExists(roomId, selectedActionId.trim())) {
             throw new BadRequestException("Invalid selectedActionId");
         }
 
@@ -88,8 +88,13 @@ public class GameSessionService {
             boolean correct = room.getCorrectActionId().equalsIgnoreCase(selectedActionId.trim());
             if (correct) {
                 scoringService.applyCorrectAnswer(session);
-                session.setCompleted(true);
-                session.setStatus(GameStatus.COMPLETED);
+                boolean gameFinished = session.getCurrentRoomId() >= roomService.getTotalRooms();
+                if (gameFinished) {
+                    session.setCompleted(true);
+                    session.setStatus(GameStatus.COMPLETED);
+                } else {
+                    session.setCurrentRoomId(session.getCurrentRoomId() + 1);
+                }
                 activityService.add(session, playerName.trim() + " solved " + room.getName());
                 sessionRepository.save(session);
                 return new SubmitActionResponse(
@@ -99,9 +104,9 @@ public class GameSessionService {
                         session.getScore(),
                         session.getServiceHealth(),
                         session.isCompleted(),
-                        "Correct! The API endpoint path was wrong.",
-                        room.getRootCause(),
-                        room.getLearningPoint()
+                        "Correct! " + room.getLearningPoint(),
+                        session.isCompleted() ? room.getRootCause() : null,
+                        session.isCompleted() ? room.getLearningPoint() : null
                 );
             }
 
@@ -115,7 +120,7 @@ public class GameSessionService {
                     session.getScore(),
                     session.getServiceHealth(),
                     session.isCompleted(),
-                    "Incorrect. This action does not fix the API endpoint mismatch.",
+                    "Incorrect. Try again.",
                     null,
                     null
             );
