@@ -1,13 +1,13 @@
 package com.team5.kubernetesoutageescaperoom.dto;
 
 public class CreateSessionRequest {
-    private String hostName;
+    private String playerName;
 
     public String getHostName() {
-        return hostName;
+        return playerName;
     }
 
-    public void setHostName(String hostName) {
-        this.hostName = hostName;
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
     }
 }

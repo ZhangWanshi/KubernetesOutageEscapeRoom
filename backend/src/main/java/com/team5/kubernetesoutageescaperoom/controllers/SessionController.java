@@ -28,6 +28,13 @@ public class SessionController {
         return service.create(request == null ? null : request.getHostName());
     }
 
+    @GetMapping("/by-room/{roomNumber}")
+    public ResponseEntity<GameSession> findByRoomNumber(@PathVariable int roomNumber) {
+        return service.findByRoomNumber(roomNumber)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/{sessionId}/join")
     public ResponseEntity<GameSession> join(@PathVariable String sessionId, @RequestBody(required = false) JoinSessionRequest request) {
         return service.join(sessionId, request == null ? null : request.getPlayerName())
@@ -37,22 +44,29 @@ public class SessionController {
 
     @GetMapping("/{sessionId}/room")
     public ResponseEntity<RoomResponse> room(@PathVariable String sessionId) {
-        return service.find(sessionId)
-                .map(session -> ResponseEntity.ok(new RoomResponse(
-                        session.getSessionId(),
-                        session.getCurrentRoom(),
-                        "Readiness Probe Failure",
-                        "The 5G network API pods are running but not receiving traffic.",
-                        List.of("Readiness probe failed: HTTP 503", "Service has no ready endpoints"),
-                        List.of("restart-pod", "fix-readiness-probe", "increase-memory")
-                )))
+        return service.getRoom(sessionId)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{sessionId}/submit")
     public ResponseEntity<SubmitResponse> submit(@PathVariable String sessionId, @RequestBody SubmitRequest request) {
         return service.submit(sessionId, request == null ? null : request.getAnswer())
-                .map(correct -> ResponseEntity.ok(new SubmitResponse(correct, correct ? "COMPLETED" : "IN_PROGRESS")))
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{sessionId}/hint")
+    public ResponseEntity<Integer> useHint(@PathVariable String sessionId) {
+        return service.useHint(sessionId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{sessionId}/players")
+    public ResponseEntity<List<String>> players(@PathVariable String sessionId) {
+        return service.find(sessionId)
+                .map(session -> ResponseEntity.ok(session.getPlayerList()))
                 .orElse(ResponseEntity.notFound().build());
     }
 
