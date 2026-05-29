@@ -1,16 +1,16 @@
 {
   "roomId": 1,
-  "name": "Jungle Microservice Quest",
-  "theme": "jungle",
+  "name": "Jungle Microservice Maze",
+  "theme": "Jungle",
   "difficulty": "EASY",
-  "failureArea": "Microservices / API",
+  "failureArea": "APIs / microservices",
   "timeLimitSeconds": 300,
-  "story": "Users cannot place orders. The frontend is working, but the Order Service fails when checking stock with the Inventory Service.",
+  "story": "The team is lost in a dense service maze. Orders reach the API gateway, but the Order Service fails when it checks stock.",
   "evidence": [
     {
       "type": "SERVICE_MAP",
       "title": "Service Dependency Map",
-      "content": "Frontend -> Order Service -> Inventory Service"
+      "content": "Browser -> API Gateway -> Order Service -> Inventory Service"
     },
     {
       "type": "API_RESPONSE",
@@ -20,7 +20,7 @@
     {
       "type": "LOG",
       "title": "Order Service Logs",
-      "content": "INFO Received order request for productId=45\nINFO Calling Inventory Service: http://inventory-service/inventory/check\nERROR Inventory check failed: 404 Not Found\nERROR Order could not be completed"
+      "content": "INFO Received order request for productId=45\nINFO Calling Inventory Service: http://inventory-service/inventory/check\nERROR Inventory check failed: 404 Not Found"
     },
     {
       "type": "API_DOC",
@@ -44,7 +44,7 @@
     },
     {
       "id": "C",
-      "text": "Update Inventory Service API path to /api/inventory/check"
+      "text": "Update the Inventory Service path to /api/inventory/check"
     },
     {
       "id": "D",
@@ -57,10 +57,10 @@
   ],
   "correctActionId": "C",
   "hints": [
-    "Both services are running. Look at API responses and logs.",
+    "Both services are running. Look at the API response from the dependency call.",
     "The Order Service receives a 404 from Inventory Service.",
-    "Compare the endpoint in the logs with the Inventory API documentation."
+    "Compare the path in the logs with the Inventory API documentation."
   ],
   "rootCause": "Order Service called /inventory/check, but Inventory Service exposes /api/inventory/check.",
-  "learningPoint": "In microservice systems, a service can be healthy but still fail due to an API contract or configuration mismatch."
+  "learningPoint": "Healthy microservices can still fail when API contracts or configured endpoint paths do not match."
 }

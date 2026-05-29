@@ -37,6 +37,10 @@ build/
 *.log
 *.err
 
+# Frontend generated files
+frontend/node_modules/
+frontend/dist/
+
 # Crash dumps
         ### Linux / Mac OS X ###
 .DS_Store

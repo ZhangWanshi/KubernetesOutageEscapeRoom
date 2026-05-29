@@ -78,19 +78,28 @@ public class GameSessionService {
         Room room = roomService.getRoom(roomId);
         requireText(playerName, "playerName must not be blank");
         requireText(selectedActionId, "selectedActionId must not be blank");
-        if (!roomService.actionExists(selectedActionId.trim())) {
+        if (!roomService.actionExists(roomId, selectedActionId.trim())) {
             throw new BadRequestException("Invalid selectedActionId");
         }
 
         GameSession session = getSession(sessionCode);
         synchronized (session) {
             requirePlayer(session, playerName);
+            requireActiveRoom(session, roomId);
             boolean correct = room.getCorrectActionId().equalsIgnoreCase(selectedActionId.trim());
             if (correct) {
                 scoringService.applyCorrectAnswer(session);
-                session.setCompleted(true);
-                session.setStatus(GameStatus.COMPLETED);
                 activityService.add(session, playerName.trim() + " solved " + room.getName());
+                boolean finalRoom = room.getRoomId() == roomService.getLastRoomId();
+                if (finalRoom) {
+                    session.setCompleted(true);
+                    session.setStatus(GameStatus.COMPLETED);
+                    activityService.add(session, "Outage escaped");
+                } else {
+                    session.setCurrentRoomId(room.getRoomId() + 1);
+                    session.setCurrentRoomHintsUsed(0);
+                    activityService.add(session, "Unlocked room " + session.getCurrentRoomId());
+                }
                 sessionRepository.save(session);
                 return new SubmitActionResponse(
                         true,
@@ -99,7 +108,7 @@ public class GameSessionService {
                         session.getScore(),
                         session.getServiceHealth(),
                         session.isCompleted(),
-                        "Correct! The API endpoint path was wrong.",
+                        finalRoom ? "Correct! The team escaped the outage." : "Correct! The next room is unlocked.",
                         room.getRootCause(),
                         room.getLearningPoint()
                 );
@@ -115,7 +124,7 @@ public class GameSessionService {
                     session.getScore(),
                     session.getServiceHealth(),
                     session.isCompleted(),
-                    "Incorrect. This action does not fix the API endpoint mismatch.",
+                    "Incorrect. This action does not fix the " + room.getFailureArea() + " failure.",
                     null,
                     null
             );
@@ -128,12 +137,14 @@ public class GameSessionService {
         GameSession session = getSession(sessionCode);
         synchronized (session) {
             requirePlayer(session, playerName);
-            int nextHintIndex = session.getHintsUsed();
+            requireActiveRoom(session, roomId);
+            int nextHintIndex = session.getCurrentRoomHintsUsed();
             if (nextHintIndex >= room.getHints().size()) {
                 return new HintResponse(0, "No more hints available.", session.getScore(), session.getServiceHealth());
             }
 
             scoringService.applyHint(session);
+            session.setCurrentRoomHintsUsed(session.getCurrentRoomHintsUsed() + 1);
             int hintNumber = nextHintIndex + 1;
             activityService.add(session, playerName.trim() + " used hint " + hintNumber);
             sessionRepository.save(session);
@@ -148,6 +159,7 @@ public class GameSessionService {
         GameSession session = getSession(sessionCode);
         synchronized (session) {
             requirePlayer(session, playerName);
+            requireActiveRoom(session, roomId);
             activityService.add(session, playerName.trim() + " viewed " + evidenceTitle.trim());
             sessionRepository.save(session);
         }
@@ -159,7 +171,7 @@ public class GameSessionService {
 
     public GameReportResponse getReport(String sessionCode) {
         GameSession session = getSession(sessionCode);
-        Room room = roomService.getRoom(1);
+        Room room = roomService.getRoom(session.getCurrentRoomId());
         return new GameReportResponse(
                 session.getSessionCode(),
                 session.getStatus(),
@@ -186,6 +198,15 @@ public class GameSessionService {
                 .anyMatch(player -> player.getName().equalsIgnoreCase(playerName.trim()));
         if (!exists) {
             throw new BadRequestException("Player is not part of this session");
+        }
+    }
+
+    private void requireActiveRoom(GameSession session, int roomId) {
+        if (session.getCurrentRoomId() != roomId) {
+            throw new BadRequestException("Room is not active for this session");
+        }
+        if (session.isCompleted()) {
+            throw new BadRequestException("Session is already completed");
         }
     }
 

@@ -1,658 +1,492 @@
-/* Time Machine Login + Jungle First Room Theme */
-
-/* -------------------------------------------------------
-   Global variables
-------------------------------------------------------- */
 :root {
-  --deep-purple: #12001f;
-  --purple-dark: #260044;
-  --purple-main: #5b21b6;
-  --purple-bright: #a855f7;
-  --purple-soft: #e9d5ff;
-  --cyan: #67e8f9;
-
-  --jungle-dark: #052e16;
-  --jungle-mid: #166534;
-  --jungle-bright: #22c55e;
-  --jungle-leaf: #86efac;
-  --jungle-gold: #facc15;
-  --jungle-earth: #422006;
+  --panel: rgba(9, 16, 24, 0.78);
+  --panel-strong: rgba(8, 12, 18, 0.9);
+  --text: #f4f7fb;
+  --muted: #b8c3cf;
+  --line: rgba(255, 255, 255, 0.18);
+  --accent: #3ddc97;
+  --accent-strong: #21b878;
+  --danger: #ff6b6b;
+  --warning: #f7c948;
+  font-family: Inter, Segoe UI, Arial, sans-serif;
 }
 
-/* -------------------------------------------------------
-   Base page
-------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+}
+
 body {
   min-height: 100vh;
   margin: 0;
-  color: #ffffff;
-  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text);
   overflow-x: hidden;
-  transition: background 0.65s ease;
+  background: #101820;
 }
 
-main.container {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-}
-
-/* -------------------------------------------------------
-   Login screen: time-machine portal
-------------------------------------------------------- */
-body.screen-join,
-body:not(.screen-room):not(.screen-final) {
-  background:
-    radial-gradient(circle at 50% 44%, rgba(168, 85, 247, 0.42), transparent 22%),
-    radial-gradient(circle at 50% 44%, rgba(103, 232, 249, 0.22), transparent 34%),
-    radial-gradient(circle at 50% 44%, rgba(18, 0, 31, 0.1), rgba(18, 0, 31, 0.92) 72%),
-    linear-gradient(135deg, #17002b 0%, #2e1065 45%, #581c87 100%);
-}
-
-/* Time-machine technical grid overlay */
-body.screen-join::before,
-body:not(.screen-room):not(.screen-final)::before {
+body::before,
+body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 0;
+}
+
+body.screen-join {
+  background:
+    radial-gradient(circle at 50% 43%, rgba(126, 214, 255, 0.28), transparent 20%),
+    radial-gradient(circle at 50% 43%, rgba(61, 220, 151, 0.18), transparent 33%),
+    linear-gradient(135deg, #07131b 0%, #183442 50%, #111827 100%);
+}
+
+body.screen-join::before {
   background-image:
-    linear-gradient(rgba(233, 213, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(233, 213, 255, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   background-size: 42px 42px;
   mask-image: radial-gradient(circle at center, black 0%, black 58%, transparent 88%);
-  opacity: 0.9;
-  z-index: 0;
 }
 
-/* Time-machine scanlines */
-body.screen-join::after,
-body:not(.screen-room):not(.screen-final)::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
+body.theme-jungle {
+  --accent: #47d764;
+  --accent-strong: #20a846;
   background:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.035) 0,
-      rgba(255, 255, 255, 0.035) 1px,
-      transparent 1px,
-      transparent 7px
-    );
-  opacity: 0.35;
-  z-index: 0;
+    radial-gradient(circle at 74% 16%, rgba(255, 221, 107, 0.78) 0 5rem, transparent 5.2rem),
+    linear-gradient(180deg, #123d35 0%, #0c2a25 40%, #081713 100%);
 }
 
-/* -------------------------------------------------------
-   Room screen: jungle theme after Join Game
-------------------------------------------------------- */
-body.screen-room {
+body.theme-jungle::before {
   background:
-    radial-gradient(circle at 20% 16%, rgba(250, 204, 21, 0.22), transparent 8%),
-    radial-gradient(circle at 82% 20%, rgba(134, 239, 172, 0.18), transparent 11%),
-    linear-gradient(135deg, rgba(5, 46, 22, 0.96), rgba(20, 83, 45, 0.94)),
-    linear-gradient(45deg, #052e16 0%, #166534 48%, #365314 100%);
+    linear-gradient(135deg, transparent 0 42%, rgba(23, 79, 54, 0.86) 43% 57%, transparent 58%) 0 100% / 4rem 35vh repeat-x,
+    linear-gradient(180deg, transparent 0%, rgba(9, 33, 23, 0.95) 80%);
 }
 
-/* Jungle leaves overlay */
-body.screen-room::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.22;
-  background:
-    radial-gradient(ellipse at 8% 8%, transparent 0 18%, rgba(134, 239, 172, 0.65) 19% 23%, transparent 24%),
-    radial-gradient(ellipse at 18% 78%, transparent 0 16%, rgba(34, 197, 94, 0.62) 17% 22%, transparent 23%),
-    radial-gradient(ellipse at 88% 14%, transparent 0 18%, rgba(134, 239, 172, 0.55) 19% 24%, transparent 25%),
-    radial-gradient(ellipse at 78% 88%, transparent 0 17%, rgba(34, 197, 94, 0.55) 18% 23%, transparent 24%);
-  filter: blur(0.2px);
-  z-index: 0;
-}
-
-/* Jungle vines */
-body.screen-room::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.34;
+body.theme-jungle::after {
+  opacity: 0.4;
   background-image:
-    linear-gradient(120deg, transparent 0 44%, rgba(134, 239, 172, 0.42) 45% 46%, transparent 47%),
-    linear-gradient(60deg, transparent 0 52%, rgba(34, 197, 94, 0.30) 53% 54%, transparent 55%),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.025) 0,
-      rgba(255, 255, 255, 0.025) 1px,
-      transparent 1px,
-      transparent 8px
-    );
-  z-index: 0;
+    linear-gradient(120deg, transparent 0 44%, rgba(134, 239, 172, 0.38) 45% 46%, transparent 47%),
+    linear-gradient(60deg, transparent 0 52%, rgba(34, 197, 94, 0.28) 53% 54%, transparent 55%);
 }
 
-/* Final screen uses dark successful result style */
-body.screen-final {
+body.theme-desert {
+  --accent: #f0b44d;
+  --accent-strong: #d78a1f;
   background:
-    radial-gradient(circle at center, rgba(34, 197, 94, 0.22), transparent 30%),
-    linear-gradient(135deg, #020617, #064e3b);
+    radial-gradient(circle at 76% 14%, rgba(255, 224, 131, 0.9) 0 5.5rem, transparent 5.7rem),
+    linear-gradient(180deg, #31556b 0%, #bd7b38 47%, #5c351d 100%);
 }
 
-body.screen-final::before,
-body.screen-final::after {
-  display: none;
+body.theme-desert::before {
+  background:
+    radial-gradient(ellipse at 20% 100%, #d69a4b 0 35%, transparent 36%),
+    radial-gradient(ellipse at 76% 104%, #a9642d 0 42%, transparent 43%);
 }
 
-/* -------------------------------------------------------
-   Shared cards
-------------------------------------------------------- */
-.card {
-  border: 1px solid rgba(233, 213, 255, 0.24);
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.94);
-  color: #2e1065;
-  box-shadow:
-    0 24px 70px rgba(7, 0, 18, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  overflow: hidden;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+body.theme-desert::after {
+  opacity: 0.22;
+  background-image:
+    linear-gradient(12deg, transparent 0 49%, rgba(255, 241, 196, 0.42) 50%, transparent 51%),
+    linear-gradient(-10deg, transparent 0 50%, rgba(108, 63, 25, 0.32) 51%, transparent 52%);
 }
 
-.card-header {
-  border-bottom: 1px solid rgba(168, 85, 247, 0.28);
-  background: linear-gradient(90deg, #2e1065, #581c87, #7e22ce);
-  color: #ffffff;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+body.theme-snow {
+  --accent: #7ed6ff;
+  --accent-strong: #4aa9d8;
+  background:
+    radial-gradient(circle at 78% 12%, rgba(233, 249, 255, 0.84) 0 4.8rem, transparent 5rem),
+    linear-gradient(180deg, #183956 0%, #315f82 48%, #e7f3fb 100%);
 }
 
-/* -------------------------------------------------------
-   Join screen layout
-------------------------------------------------------- */
-#join-screen {
-  position: relative;
-  min-height: calc(100vh - 6rem);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 0;
+body.theme-snow::before {
+  background:
+    linear-gradient(135deg, transparent 0 35%, rgba(238, 247, 252, 0.9) 36% 65%, transparent 66%) 8% 100% / 55vw 52vh no-repeat,
+    linear-gradient(45deg, transparent 0 38%, rgba(173, 211, 231, 0.96) 39% 64%, transparent 65%) 70% 100% / 48vw 42vh no-repeat;
 }
 
-#join-screen > .row {
+body.theme-snow::after {
+  opacity: 0.55;
+  background:
+    radial-gradient(circle at 18% 26%, white 0 1px, transparent 2px),
+    radial-gradient(circle at 42% 18%, white 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 34%, white 0 1px, transparent 2px),
+    radial-gradient(circle at 64% 64%, white 0 1px, transparent 2px);
+  background-size: 180px 180px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  min-height: 2.65rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.65rem 0.9rem;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.primary-button {
+  border-color: transparent;
+  background: var(--accent-strong);
+}
+
+input {
   width: 100%;
-  margin-left: 0;
-  margin-right: 0;
-  justify-content: center;
+  min-height: 2.65rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.65rem 0.8rem;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.28);
+  outline: none;
 }
 
-#join-screen .col-md-7,
-#join-screen .col-lg-5 {
-  width: min(100%, 590px);
-  max-width: 590px;
-  flex: 0 0 auto;
+input:focus {
+  border-color: var(--accent);
 }
 
-/* Portal ring behind login */
-#join-screen::before {
-  content: "";
-  position: absolute;
-  width: min(82vw, 760px);
-  height: min(82vw, 760px);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  pointer-events: none;
-  background:
-    radial-gradient(circle, transparent 0 34%, rgba(103, 232, 249, 0.14) 35% 36%, transparent 37% 42%),
-    radial-gradient(circle, transparent 0 46%, rgba(168, 85, 247, 0.32) 47% 48%, transparent 49% 55%),
-    conic-gradient(
-      from 0deg,
-      transparent,
-      rgba(103, 232, 249, 0.42),
-      transparent,
-      rgba(168, 85, 247, 0.55),
-      transparent,
-      rgba(250, 204, 21, 0.26),
-      transparent
-    );
-  opacity: 0.95;
-  animation: portalSpin 18s linear infinite;
-  z-index: -2;
-}
-
-#join-screen::after {
-  content: "";
-  position: absolute;
-  width: min(62vw, 520px);
-  height: min(62vw, 520px);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  pointer-events: none;
-  background:
-    radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 16%),
-    radial-gradient(circle, rgba(103, 232, 249, 0.20), transparent 28%),
-    radial-gradient(circle, rgba(168, 85, 247, 0.34), transparent 54%);
-  box-shadow:
-    0 0 80px rgba(168, 85, 247, 0.42),
-    0 0 120px rgba(103, 232, 249, 0.18);
-  opacity: 0.95;
-  animation: portalPulse 3.8s ease-in-out infinite;
-  z-index: -1;
-}
-
-/* Transparent login card */
-#join-screen .card {
-  position: relative;
-  width: 100%;
-  max-width: 590px;
-  margin: 0 auto;
-  border: 1px solid rgba(233, 213, 255, 0.28);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(34, 10, 68, 0.34),
-      rgba(59, 18, 101, 0.22)
-    );
-  color: #ffffff;
-  box-shadow:
-    0 0 0 1px rgba(103, 232, 249, 0.14),
-    0 28px 80px rgba(7, 0, 18, 0.46),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(9px);
-  -webkit-backdrop-filter: blur(9px);
-}
-
-#join-screen .card::before {
-  content: "TIME MACHINE ACCESS TERMINAL";
-  display: block;
-  padding: 0.95rem 1rem;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(30, 6, 56, 0.56),
-      rgba(76, 29, 149, 0.46) 45%,
-      rgba(126, 34, 206, 0.44) 100%
-    );
-  color: #f5e9ff;
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.18em;
-  text-align: center;
-  border-bottom: 1px solid rgba(233, 213, 255, 0.22);
-}
-
-/* Terminal lights */
-#join-screen .card::after {
-  content: "";
-  position: absolute;
-  top: 1.05rem;
-  left: 1rem;
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 999px;
-  background: #ef4444;
-  box-shadow:
-    1.05rem 0 0 #facc15,
-    2.1rem 0 0 #22c55e;
-}
-
-#join-screen h1 {
-  color: #ffffff;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
-}
-
-#join-screen h1::after {
-  content: "Prepare for temporal transfer";
-  display: block;
-  margin-top: 0.45rem;
-  color: #d8b4fe;
+label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--muted);
   font-size: 0.9rem;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: clamp(1.8rem, 3.4vw, 3.3rem);
+  letter-spacing: 0;
+}
+
+h2 {
+  margin-bottom: 0.55rem;
+  font-size: clamp(1.45rem, 2.5vw, 2.3rem);
+  letter-spacing: 0;
+}
+
+h3 {
+  margin: 1rem 0 0.75rem;
+  font-size: 1rem;
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+  width: min(1420px, calc(100% - 2rem));
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 1.25rem 0 2rem;
+}
+
+.top-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.eyebrow {
+  margin-bottom: 0.35rem;
+  color: var(--accent);
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-#join-screen p.text-muted {
-  color: #eee5ff !important;
+.session-chip,
+.difficulty-badge {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.28);
+  font-weight: 700;
 }
 
-.text-muted {
-  color: #6b5b7d !important;
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 1.2rem 3rem rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(12px);
 }
 
-/* -------------------------------------------------------
-   Jungle room styling
-------------------------------------------------------- */
-body.screen-room .card {
-  border: 1px solid rgba(187, 247, 208, 0.32);
-  background: rgba(240, 253, 244, 0.94);
-  color: #052e16;
-  box-shadow:
-    0 24px 70px rgba(1, 32, 14, 0.50),
-    inset 0 1px 0 rgba(255, 255, 255, 0.80);
+.lobby {
+  display: grid;
+  min-height: 68vh;
+  place-items: center;
 }
 
-body.screen-room .card-header {
-  border-bottom: 1px solid rgba(187, 247, 208, 0.40);
-  background: linear-gradient(90deg, #052e16, #166534, #365314);
-  color: #dcfce7;
+.intro-panel {
+  width: min(720px, 100%);
+  padding: 1.4rem;
 }
 
-body.screen-room #room-title::before {
-  content: "🌿 ";
+.intro-panel p {
+  color: var(--muted);
 }
 
-body.screen-room #room-title {
-  color: #ffffff;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  text-shadow: 0 8px 28px rgba(0, 0, 0, 0.44);
+.join-actions {
+  display: grid;
+  grid-template-columns: auto minmax(220px, 1fr) auto;
+  gap: 0.8rem;
+  align-items: end;
+  margin-top: 1rem;
 }
 
-body.screen-room #room-problem {
-  color: #dcfce7 !important;
-  font-weight: 650;
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 310px) minmax(0, 1fr);
+  gap: 1rem;
 }
 
-body.screen-room #evidence-panel .list-group-item {
-  border: 1px solid rgba(22, 101, 52, 0.20);
-  background: rgba(240, 253, 244, 0.94);
-  color: #052e16;
+.status-panel,
+.evidence-panel,
+.action-panel,
+.console-panel,
+.report-panel {
+  padding: 1rem;
 }
 
-body.screen-room .btn-outline-primary {
-  border-color: rgba(22, 101, 52, 0.30);
-  color: #052e16;
-  background: rgba(255, 255, 255, 0.94);
+.status-panel {
+  position: sticky;
+  top: 1rem;
+  align-self: start;
 }
 
-body.screen-room .btn-outline-primary:hover,
-body.screen-room .btn-outline-primary:focus {
-  border-color: #22c55e;
-  background: #dcfce7;
-  color: #052e16;
+.metric-row,
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
 }
 
-body.screen-room .progress {
-  background: #bbf7d0;
+.metric-row {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
 }
 
-body.screen-room .progress-bar {
-  background: linear-gradient(90deg, #166534, #22c55e, #facc15);
-  color: #052e16;
+.metric-row span,
+.section-heading span {
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
-/* -------------------------------------------------------
-   Forms
-------------------------------------------------------- */
-.form-label {
-  color: #f5e9ff;
-  font-weight: 800;
-}
-
-.form-control {
-  border: 1px solid #c4b5fd;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.94);
-  color: #2e1065;
-  padding: 0.85rem 1rem;
-  font-weight: 650;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.75),
-    0 10px 24px rgba(91, 33, 182, 0.08);
-}
-
-#join-screen .form-control {
-  border-color: rgba(233, 213, 255, 0.34);
-  background: rgba(255, 255, 255, 0.10);
-  color: #ffffff;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 10px 24px rgba(7, 0, 18, 0.16);
-}
-
-.form-control::placeholder {
-  color: #9f8bbd;
-  font-weight: 500;
-}
-
-#join-screen .form-control::placeholder {
-  color: rgba(245, 233, 255, 0.68);
-}
-
-.form-control:focus,
-#join-screen .form-control:focus {
-  border-color: var(--cyan);
-  background: rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-  box-shadow:
-    0 0 0 0.25rem rgba(103, 232, 249, 0.18),
-    0 10px 24px rgba(7, 0, 18, 0.20);
-}
-
-/* -------------------------------------------------------
-   Buttons
-------------------------------------------------------- */
-.btn-primary {
-  border: 0;
-  border-radius: 16px;
-  background: linear-gradient(90deg, #5b21b6, #7e22ce 48%, #a855f7);
-  color: #ffffff;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  box-shadow:
-    0 14px 28px rgba(91, 33, 182, 0.36),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
-  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(90deg, #4c1d95, #7e22ce 48%, #c084fc);
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow:
-    0 18px 36px rgba(91, 33, 182, 0.46),
-    0 0 22px rgba(103, 232, 249, 0.20);
-  filter: brightness(1.04);
-}
-
-body.screen-room .btn-primary {
-  background: linear-gradient(90deg, #166534, #22c55e, #86efac);
-  color: #052e16;
-  box-shadow:
-    0 14px 28px rgba(5, 46, 22, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
-}
-
-body.screen-room .btn-primary:hover {
-  background: linear-gradient(90deg, #14532d, #16a34a, #bbf7d0);
-  color: #052e16;
-}
-
-.btn-primary:active {
-  transform: translateY(1px);
-}
-
-.btn-outline-primary {
-  border: 1px solid #c4b5fd;
-  border-radius: 16px;
-  color: #3b0764;
-  background: rgba(255, 255, 255, 0.94);
-  font-weight: 800;
-  box-shadow: 0 10px 20px rgba(91, 33, 182, 0.10);
-}
-
-.btn-outline-primary:hover,
-.btn-outline-primary:focus {
-  border-color: #7e22ce;
-  background: #f3e8ff;
-  color: #2e1065;
-  transform: translateY(-1px);
-}
-
-.btn:disabled {
-  opacity: 0.58;
-}
-
-/* -------------------------------------------------------
-   Evidence, badges, progress, alerts
-------------------------------------------------------- */
-#evidence-panel .list-group-item {
-  border: 1px solid #ddd6fe;
-  background: #faf5ff;
-  color: #2e1065;
-  margin-bottom: 0.65rem;
-  border-radius: 14px;
-  font-weight: 650;
-}
-
-.badge {
-  border-radius: 999px;
-  padding: 0.7rem 0.9rem;
-  font-size: 0.94rem;
-  font-weight: 900;
-  border: 1px solid rgba(255, 255, 255, 0.54);
-}
-
-.text-bg-success {
-  background: rgba(34, 197, 94, 0.92) !important;
-  color: #052e16 !important;
-}
-
-.text-bg-danger {
-  background: rgba(244, 63, 94, 0.92) !important;
-  color: #4c0519 !important;
-}
-
-.progress {
-  height: 1rem;
-  border-radius: 999px;
-  background: #ede9fe;
+.health-track {
+  height: 0.65rem;
+  margin: 0.9rem 0 1rem;
+  border-radius: 99px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.13);
 }
 
-.progress-bar {
-  background: linear-gradient(90deg, #5b21b6, #a855f7, #67e8f9);
-  color: #ffffff;
-  font-weight: 900;
+.health-track div {
+  height: 100%;
+  background: linear-gradient(90deg, var(--danger), var(--warning), var(--accent));
+  transition: width 180ms ease;
 }
 
-.alert {
-  border-radius: 16px;
+.plain-list,
+.activity-list {
+  margin: 0;
+  padding-left: 1rem;
+  color: var(--muted);
+}
+
+.plain-list {
+  display: grid;
+  gap: 0.35rem;
+  list-style: square;
+}
+
+.activity-list {
+  display: grid;
+  max-height: 14rem;
+  gap: 0.45rem;
+  overflow: auto;
+  font-size: 0.88rem;
+}
+
+.status-panel button {
+  width: 100%;
+  margin-bottom: 0.65rem;
+}
+
+.room-stage {
+  min-width: 0;
+}
+
+.room-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0));
+}
+
+.room-heading p {
+  max-width: 72ch;
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.evidence-list,
+.action-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.evidence-button,
+.action-button {
+  width: 100%;
+  min-height: 4.1rem;
+  text-align: left;
+}
+
+.evidence-button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.evidence-type {
+  min-width: 3rem;
+  border-radius: 6px;
+  padding: 0.4rem;
+  color: #06120d;
+  background: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.evidence-title,
+.action-title {
+  display: block;
+  color: var(--text);
   font-weight: 800;
 }
 
-.alert-success {
-  border-color: #86efac;
-  background: #dcfce7;
-  color: #166534;
+.evidence-summary,
+.action-id {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.86rem;
 }
 
-.alert-danger {
-  border-color: #fecdd3;
-  background: #ffe4e6;
-  color: #9f1239;
+.console-panel {
+  background: var(--panel-strong);
 }
 
-/* -------------------------------------------------------
-   Final result
-------------------------------------------------------- */
-.result-box {
-  border: 1px solid #ddd6fe;
-  border-radius: 20px;
-  padding: 1.1rem;
-  background: #faf5ff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+pre {
+  min-height: 12rem;
+  margin: 0.75rem 0 0;
+  white-space: pre-wrap;
+  overflow: auto;
+  color: #dce8d8;
+  font-family: Consolas, Monaco, monospace;
+  line-height: 1.5;
 }
 
-.result-box h2 {
-  color: #6d28d9;
-  font-weight: 900;
+.error-text {
+  min-height: 1.4rem;
+  margin: 0.8rem 0 0;
+  color: var(--danger);
 }
 
-code {
-  color: #581c87;
-  background: #f3e8ff;
-  border-radius: 7px;
-  padding: 0.1rem 0.4rem;
-  font-weight: 700;
+.report-panel {
+  width: min(900px, 100%);
+  margin: 1rem auto;
 }
 
-#join-screen code {
-  color: #f5e9ff;
-  background: rgba(255, 255, 255, 0.12);
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
 }
 
-/* -------------------------------------------------------
-   Animations
-------------------------------------------------------- */
-@keyframes portalSpin {
-  from {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+.report-grid div {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.07);
 }
 
-@keyframes portalPulse {
-  0%, 100% {
-    transform: translate(-50%, -50%) scale(0.96);
-    opacity: 0.78;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.04);
-    opacity: 1;
-  }
+.report-grid span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.86rem;
 }
 
-/* -------------------------------------------------------
-   Mobile
-------------------------------------------------------- */
-@media (max-width: 768px) {
-  main.container {
-    padding-top: 1.5rem !important;
-    padding-bottom: 1.5rem !important;
+.report-grid strong {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.6rem;
+}
+
+@media (max-width: 980px) {
+  .game-layout,
+  .workspace-grid {
+    grid-template-columns: 1fr;
   }
 
-  #join-screen {
-    min-height: auto;
-    padding: 1rem 0;
+  .status-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 680px) {
+  .app-shell {
+    width: min(100% - 1rem, 1420px);
+    padding-top: 0.7rem;
   }
 
-  #join-screen .col-md-7,
-  #join-screen .col-lg-5 {
+  .top-bar,
+  .room-heading,
+  .join-actions,
+  .report-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .session-chip,
+  .difficulty-badge {
     width: 100%;
-    max-width: 100%;
-  }
-
-  #join-screen::before {
-    width: 560px;
-    height: 560px;
-    opacity: 0.56;
-  }
-
-  #join-screen::after {
-    width: 380px;
-    height: 380px;
-    opacity: 0.65;
-  }
-
-  .card-body {
-    padding: 1.25rem !important;
-  }
-
-  .d-flex.justify-content-between {
-    gap: 1rem;
-    align-items: flex-start !important;
-    flex-direction: column;
   }
 }

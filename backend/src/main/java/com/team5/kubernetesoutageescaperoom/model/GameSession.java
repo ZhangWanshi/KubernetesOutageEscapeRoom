@@ -53,6 +53,9 @@ public class GameSession {
     @Column(nullable = false)
     private int hintsUsed;
 
+    @Column(nullable = false)
+    private int currentRoomHintsUsed;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "activity_feed", joinColumns = @JoinColumn(name = "session_code"))
     @OrderColumn(name = "event_order")

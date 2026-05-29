@@ -60,7 +60,13 @@ class Room1GameFlowTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.correct").value(true))
                 .andExpect(jsonPath("$.score").value(120))
+                .andExpect(jsonPath("$.completed").value(false))
                 .andExpect(jsonPath("$.rootCause").value(startsWith("Order Service called")));
+
+        mockMvc.perform(get("/api/sessions/{sessionCode}/state", sessionCode))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentRoomId").value(2))
+                .andExpect(jsonPath("$.completed").value(false));
     }
 
     @Test
@@ -86,7 +92,7 @@ class Room1GameFlowTests {
                         .content("{\"playerName\":\"Madhuri\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hintNumber").value(1))
-                .andExpect(jsonPath("$.hint").value("Both services are running. Look at API responses and logs."))
+                .andExpect(jsonPath("$.hint").value("Both services are running. Look at the API response from the dependency call."))
                 .andExpect(jsonPath("$.score").value(95));
     }
 
@@ -100,10 +106,12 @@ class Room1GameFlowTests {
     }
 
     @Test
-    void getRoomTwoReturnsNotFound() throws Exception {
+    void getRoomTwoReturnsDesertScenario() throws Exception {
         mockMvc.perform(get("/api/rooms/2"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Room not found"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Desert Resource Survival"))
+                .andExpect(jsonPath("$.theme").value("Desert"))
+                .andExpect(jsonPath("$.failureArea").value("Containers / resource limits"));
     }
 
     @Test
@@ -122,6 +130,36 @@ class Room1GameFlowTests {
                         .content("{\"playerName\":\"Madhuri\",\"selectedActionId\":\"Z\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Invalid selectedActionId"));
+    }
+
+    @Test
+    void cannotSubmitRoomThatIsNotActive() throws Exception {
+        String sessionCode = createJoinedSession();
+
+        mockMvc.perform(post("/api/sessions/{sessionCode}/rooms/2/submit", sessionCode)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"playerName\":\"Madhuri\",\"selectedActionId\":\"A\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Room is not active for this session"));
+    }
+
+    @Test
+    void fullEscapeFlowProgressesThroughThreeRooms() throws Exception {
+        String sessionCode = createJoinedSession();
+
+        submitCorrect(sessionCode, 1, "C")
+                .andExpect(jsonPath("$.completed").value(false));
+        submitCorrect(sessionCode, 2, "A")
+                .andExpect(jsonPath("$.completed").value(false));
+        submitCorrect(sessionCode, 3, "A")
+                .andExpect(jsonPath("$.completed").value(true))
+                .andExpect(jsonPath("$.score").value(160));
+
+        mockMvc.perform(get("/api/sessions/{sessionCode}/report", sessionCode))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.completed").value(true))
+                .andExpect(jsonPath("$.roomName").value("Snow Mountain Service Pass"))
+                .andExpect(jsonPath("$.rootCause").value(startsWith("The Service selected app=api")));
     }
 
     @Test
@@ -152,5 +190,17 @@ class Room1GameFlowTests {
                 .getContentAsString();
         JsonNode json = objectMapper.readTree(response);
         return json.get("sessionCode").asText();
+    }
+
+    private org.springframework.test.web.servlet.ResultActions submitCorrect(
+            String sessionCode,
+            int roomId,
+            String selectedActionId
+    ) throws Exception {
+        return mockMvc.perform(post("/api/sessions/{sessionCode}/rooms/{roomId}/submit", sessionCode, roomId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"playerName\":\"Madhuri\",\"selectedActionId\":\"" + selectedActionId + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.correct").value(true));
     }
 }
