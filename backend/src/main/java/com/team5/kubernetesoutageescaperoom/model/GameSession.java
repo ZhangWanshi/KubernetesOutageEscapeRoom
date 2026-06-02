@@ -44,6 +44,11 @@ public class GameSession {
     @OrderColumn(name = "player_order")
     private List<Player> players = new ArrayList<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "session_pending_players", joinColumns = @JoinColumn(name = "session_code"))
+    @OrderColumn(name = "player_order")
+    private List<Player> pendingPlayers = new ArrayList<>();
+
     @Column(nullable = false)
     private boolean completed;
 

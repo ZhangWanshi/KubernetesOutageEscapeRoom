@@ -21,6 +21,7 @@ import com.team5.kubernetesoutageescaperoom.dto.Room3StateResponse;
 import com.team5.kubernetesoutageescaperoom.dto.SessionStateResponse;
 import com.team5.kubernetesoutageescaperoom.dto.SubmitActionResponse;
 import com.team5.kubernetesoutageescaperoom.exception.BadRequestException;
+import com.team5.kubernetesoutageescaperoom.exception.ConflictException;
 import com.team5.kubernetesoutageescaperoom.exception.NotFoundException;
 import com.team5.kubernetesoutageescaperoom.model.ActivityEvent;
 import com.team5.kubernetesoutageescaperoom.model.GameSession;
@@ -104,12 +105,55 @@ public class GameSessionService {
 
     public SessionStateResponse joinSession(String sessionCode, String playerName) {
         requireText(playerName, "playerName must not be blank");
+        String name = playerName.trim();
         GameSession session = getSession(sessionCode);
         synchronized (session) {
-            if (session.getPlayers().stream().noneMatch(player -> player.getName().equalsIgnoreCase(playerName.trim()))) {
-                session.getPlayers().add(new Player(playerName.trim()));
-                activityService.add(session, playerName.trim() + " joined the session");
+            boolean nameInPlayers = session.getPlayers().stream()
+                    .anyMatch(p -> p.getName().equalsIgnoreCase(name));
+            boolean nameInPending = session.getPendingPlayers().stream()
+                    .anyMatch(p -> p.getName().equalsIgnoreCase(name));
+            if (nameInPlayers || nameInPending) {
+                throw new ConflictException("The name \"" + name + "\" is already taken in this session.");
             }
+            // First player becomes the host and is admitted directly
+            if (session.getPlayers().isEmpty()) {
+                session.getPlayers().add(new Player(name));
+                activityService.add(session, name + " created the session");
+            } else {
+                session.getPendingPlayers().add(new Player(name));
+                activityService.add(session, name + " is requesting to join");
+            }
+            return toStateResponse(sessionRepository.save(session));
+        }
+    }
+
+    public SessionStateResponse approvePlayer(String sessionCode, String playerName) {
+        requireText(playerName, "playerName must not be blank");
+        String name = playerName.trim();
+        GameSession session = getSession(sessionCode);
+        synchronized (session) {
+            Player pending = session.getPendingPlayers().stream()
+                    .filter(p -> p.getName().equalsIgnoreCase(name))
+                    .findFirst()
+                    .orElseThrow(() -> new NotFoundException("Player not in pending list"));
+            session.getPendingPlayers().remove(pending);
+            session.getPlayers().add(new Player(pending.getName()));
+            activityService.add(session, pending.getName() + " was approved and joined the session");
+            return toStateResponse(sessionRepository.save(session));
+        }
+    }
+
+    public SessionStateResponse declinePlayer(String sessionCode, String playerName) {
+        requireText(playerName, "playerName must not be blank");
+        String name = playerName.trim();
+        GameSession session = getSession(sessionCode);
+        synchronized (session) {
+            boolean removed = session.getPendingPlayers()
+                    .removeIf(p -> p.getName().equalsIgnoreCase(name));
+            if (!removed) {
+                throw new NotFoundException("Player not in pending list");
+            }
+            activityService.add(session, name + " was declined");
             return toStateResponse(sessionRepository.save(session));
         }
     }
@@ -384,6 +428,26 @@ public class GameSessionService {
         }
     }
 
+    public SessionStateResponse completeRoom(String sessionCode, int roomId) {
+        GameSession session = getSession(sessionCode);
+        synchronized (session) {
+            if (session.getCurrentRoomId() != roomId) return toStateResponse(session);
+            if (session.isCompleted()) return toStateResponse(session);
+            scoringService.applyCorrectAnswer(session);
+            boolean finalRoom = roomId >= roomService.getLastRoomId();
+            if (finalRoom) {
+                session.setCompleted(true);
+                session.setStatus(GameStatus.COMPLETED);
+                activityService.add(session, "Outage escaped — all rooms cleared!");
+            } else {
+                session.setCurrentRoomId(roomId + 1);
+                session.setCurrentRoomHintsUsed(0);
+                activityService.add(session, "Room " + roomId + " completed — room " + session.getCurrentRoomId() + " unlocked");
+            }
+            return toStateResponse(sessionRepository.save(session));
+        }
+    }
+
     public HintResponse requestHint(String sessionCode, int roomId, String playerName) {
         Room room = roomService.getRoom(roomId);
         requireText(playerName, "playerName must not be blank");
@@ -533,6 +597,7 @@ public class GameSessionService {
                 session.getScore(),
                 session.getServiceHealth(),
                 session.getPlayers().stream().map(this::toPlayerDto).toList(),
+                session.getPendingPlayers().stream().map(this::toPlayerDto).toList(),
                 session.isCompleted(),
                 session.getWrongAttempts(),
                 session.getHintsUsed(),

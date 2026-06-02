@@ -124,6 +124,14 @@ public class SessionController {
         );
     }
 
+    @PostMapping("/{sessionCode}/rooms/{roomId}/complete")
+    public SessionStateResponse completeRoom(
+            @PathVariable String sessionCode,
+            @PathVariable int roomId
+    ) {
+        return gameSessionService.completeRoom(sessionCode, roomId);
+    }
+
     @PostMapping("/{sessionCode}/rooms/{roomId}/begin")
     public MessageResponse beginInvestigation(
             @PathVariable String sessionCode,
@@ -160,6 +168,16 @@ public class SessionController {
                 request == null ? null : request.evidenceTitle()
         );
         return new MessageResponse("Evidence view recorded.");
+    }
+
+    @PostMapping("/{sessionCode}/players/{playerName}/approve")
+    public SessionStateResponse approvePlayer(@PathVariable String sessionCode, @PathVariable String playerName) {
+        return gameSessionService.approvePlayer(sessionCode, playerName);
+    }
+
+    @PostMapping("/{sessionCode}/players/{playerName}/decline")
+    public SessionStateResponse declinePlayer(@PathVariable String sessionCode, @PathVariable String playerName) {
+        return gameSessionService.declinePlayer(sessionCode, playerName);
     }
 
     @GetMapping("/{sessionCode}/activity")

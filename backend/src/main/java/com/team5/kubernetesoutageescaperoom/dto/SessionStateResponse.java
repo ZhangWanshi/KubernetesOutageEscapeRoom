@@ -11,6 +11,7 @@ public record SessionStateResponse(
         int score,
         int serviceHealth,
         List<PlayerDto> players,
+        List<PlayerDto> pendingPlayers,
         boolean completed,
         int wrongAttempts,
         int hintsUsed,
