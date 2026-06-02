@@ -56,6 +56,24 @@ public class GameSession {
     @Column(nullable = false)
     private int currentRoomHintsUsed;
 
+    @Column(name = "room1_current_level", nullable = false)
+    private int room1CurrentLevel = 1;
+
+    @Column(name = "room1_completed", nullable = false)
+    private boolean room1Completed;
+
+    @Column(name = "room2_current_level", nullable = false)
+    private int room2CurrentLevel = 1;
+
+    @Column(name = "room2_completed", nullable = false)
+    private boolean room2Completed;
+
+    @Column(name = "room3_current_level", nullable = false)
+    private int room3CurrentLevel = 1;
+
+    @Column(name = "room3_completed", nullable = false)
+    private boolean room3Completed;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "activity_feed", joinColumns = @JoinColumn(name = "session_code"))
     @OrderColumn(name = "event_order")

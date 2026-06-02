@@ -1,11 +1,11 @@
 {
   "roomId": 1,
-  "name": "Jungle Microservice Maze",
-  "theme": "Jungle",
+  "name": "Microservice Incident Response",
+  "theme": "Forest",
   "difficulty": "EASY",
   "failureArea": "APIs / microservices",
   "timeLimitSeconds": 300,
-  "story": "The team is lost in a dense service maze. Orders reach the API gateway, but the Order Service fails when it checks stock.",
+  "story": "A production incident has affected the Customer Management Platform. Your task is to restore the system by checking service health, identifying service responsibilities, and fixing a missing configuration value.",
   "evidence": [
     {
       "type": "SERVICE_MAP",
@@ -15,22 +15,22 @@
     {
       "type": "API_RESPONSE",
       "title": "Order API Response",
-      "content": "POST /api/orders returns HTTP 500: Unable to complete order"
+      "content": "POST /api/orders returns HTTP 500.\nError: Unable to complete order.\nFailure occurs when Order Service calls Inventory Service."
     },
     {
       "type": "LOG",
       "title": "Order Service Logs",
-      "content": "INFO Received order request for productId=45\nINFO Calling Inventory Service: http://inventory-service/inventory/check\nERROR Inventory check failed: 404 Not Found"
+      "content": "INFO Received order request for productId=45\nINFO Calling Inventory Service\nERROR Connection failed while calling inventory endpoint"
     },
     {
       "type": "API_DOC",
       "title": "Inventory API Documentation",
-      "content": "Available endpoint: GET /api/inventory/check?productId={id}"
+      "content": "Available endpoint:\nGET /api/inventory/check?productId={id}"
     },
     {
       "type": "CONFIG",
       "title": "Order Service Config",
-      "content": "inventory.service.base-url=http://inventory-service\ninventory.service.check-path=/inventory/check"
+      "content": "inventory.service.base-url=http://inventory-service\ninventory.service.check-path=/invent"
     }
   ],
   "actions": [
@@ -57,10 +57,8 @@
   ],
   "correctActionId": "C",
   "hints": [
-    "Both services are running. Look at the API response from the dependency call.",
-    "The Order Service receives a 404 from Inventory Service.",
-    "Compare the path in the logs with the Inventory API documentation."
+    "Compare the Order Service configuration with the Inventory API documentation. Look carefully at the endpoint path."
   ],
-  "rootCause": "Order Service called /inventory/check, but Inventory Service exposes /api/inventory/check.",
+  "rootCause": "Order Service called /invent, but Inventory Service exposes /api/inventory/check.",
   "learningPoint": "Healthy microservices can still fail when API contracts or configured endpoint paths do not match."
 }

@@ -13,6 +13,7 @@ public record SessionStateResponse(
         List<PlayerDto> players,
         boolean completed,
         int wrongAttempts,
-        int hintsUsed
+        int hintsUsed,
+        boolean currentRoomHintUsed
 ) {
 }

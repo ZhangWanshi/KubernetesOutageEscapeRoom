@@ -16,6 +16,7 @@ public record GameReportResponse(
         List<ActivityEventDto> activityFeed,
         String roomName,
         String rootCause,
-        String learningPoint
+        String learningPoint,
+        List<RoomLearningSummaryDto> learningSummaries
 ) {
 }

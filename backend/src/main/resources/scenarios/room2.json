@@ -5,12 +5,12 @@
   "difficulty": "MEDIUM",
   "failureArea": "Containers / resource limits",
   "timeLimitSeconds": 360,
-  "story": "The metrics pipeline is stranded in a resource desert. The pod starts, then dies whenever telemetry volume rises.",
+  "story": "The metrics pipeline is stranded in a resource desert. The pod starts, then dies whenever telemetry volume rises. Find the resource problem before observability is lost.",
   "evidence": [
     {
       "type": "POD_STATUS",
       "title": "Pod Status",
-      "content": "metrics-aggregator-7c9d8f: CrashLoopBackOff\nLast State: Terminated\nReason: OOMKilled\nExit Code: 137"
+      "content": "metrics-aggregator pod is in CrashLoopBackOff.\nLast State: Terminated.\nReason: OOMKilled."
     },
     {
       "type": "METRIC",
@@ -25,7 +25,7 @@
     {
       "type": "LOG",
       "title": "Aggregator Logs",
-      "content": "INFO Loaded 50000 metric samples\nWARN Heap pressure above 90%\nERROR Process terminated before batch flush"
+      "content": "INFO Loaded 50000 metric samples\nWARN Heap pressure above 90%\nERROR Process terminated by kernel"
     },
     {
       "type": "K8S_EVENT",
@@ -57,9 +57,7 @@
   ],
   "correctActionId": "A",
   "hints": [
-    "The pod is not failing because traffic cannot reach it.",
-    "Exit code 137 and OOMKilled point to memory pressure.",
-    "Compare observed memory usage with the configured container limit."
+    "Check whether the memory usage is higher than the configured memory limit."
   ],
   "rootCause": "The metrics-aggregator container needed about 246Mi during bursts, but its memory limit was only 192Mi.",
   "learningPoint": "Container memory limits protect the cluster, but limits that are too low cause OOMKilled restarts and service instability."

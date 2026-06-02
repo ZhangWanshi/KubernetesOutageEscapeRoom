@@ -61,6 +61,10 @@ public class RoomService {
                 .orElse(1);
     }
 
+    public List<Room> getAllRooms() {
+        return rooms;
+    }
+
     private List<Room> loadRooms(ObjectMapper objectMapper) {
         List<Room> loadedRooms = SCENARIO_FILES.stream()
                 .map(file -> loadRoom(objectMapper, file))
@@ -127,12 +131,12 @@ public class RoomService {
     private Room fallbackRoom1() {
         Room room = new Room();
         room.setRoomId(1);
-        room.setName("Jungle Microservice Maze");
-        room.setTheme("Jungle");
+        room.setName("Microservice Incident Response");
+        room.setTheme("Forest");
         room.setDifficulty("EASY");
         room.setFailureArea("APIs / microservices");
         room.setTimeLimitSeconds(300);
-        room.setStory("The team is lost in a dense service maze. Orders reach the API gateway, but the Order Service fails when it checks stock.");
+        room.setStory("A production incident has affected the Customer Management Platform. Your task is to restore the system by checking service health, identifying service responsibilities, and fixing a missing configuration value.");
         room.setEvidence(List.of(
                 new Evidence("SERVICE_MAP", "Service Dependency Map", "Browser -> API Gateway -> Order Service -> Inventory Service"),
                 new Evidence("API_RESPONSE", "Order API Response", "POST /api/orders returns HTTP 500: Unable to complete order"),

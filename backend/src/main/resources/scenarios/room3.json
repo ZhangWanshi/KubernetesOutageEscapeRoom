@@ -1,16 +1,16 @@
 {
   "roomId": 3,
-  "name": "Snow Mountain Service Pass",
-  "theme": "Snow Mountain",
+  "name": "Kubernetes Service Routing Fix",
+  "theme": "Kubernetes Command Center",
   "difficulty": "HARD",
   "failureArea": "Kubernetes service discovery",
   "timeLimitSeconds": 420,
-  "story": "At the frozen summit, the API pods are healthy but no traffic reaches them. The escape route is blocked by an empty Service endpoint list.",
+  "story": "A Kubernetes service is running, and the application pods are healthy, but user traffic is not reaching the application. Your task is to inspect the service, follow the correct debugging sequence, and apply the correct selector fix.",
   "evidence": [
     {
       "type": "POD_STATUS",
       "title": "Pod Status",
-      "content": "game-api-6f9dd: Running\nReadiness: passing\nLabels: app=game-api, tier=backend"
+      "content": "game-api pod is Running.\nReadiness probe is passing.\nLabels: app=game-api, tier=backend"
     },
     {
       "type": "SERVICE",
@@ -20,7 +20,7 @@
     {
       "type": "LOG",
       "title": "API Logs",
-      "content": "INFO Started Game API on port 8081\nINFO Readiness check passed\nINFO No incoming requests in the last 5 minutes"
+      "content": "INFO Started Game API on port 8081\nINFO Readiness check passed\nINFO No incoming requests"
     },
     {
       "type": "HEALTH_CHECK",
@@ -57,8 +57,6 @@
   ],
   "correctActionId": "A",
   "hints": [
-    "The pod is healthy when called directly.",
-    "A Service with no endpoints usually has a selector mismatch or no ready pods.",
     "Compare the Service selector with the Deployment pod labels."
   ],
   "rootCause": "The Service selected app=api, but the Deployment pods were labelled app=game-api, so Kubernetes created no endpoints.",

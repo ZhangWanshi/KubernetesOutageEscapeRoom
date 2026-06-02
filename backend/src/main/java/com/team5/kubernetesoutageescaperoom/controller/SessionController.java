@@ -1,5 +1,6 @@
 package com.team5.kubernetesoutageescaperoom.controller;
 
+import com.team5.kubernetesoutageescaperoom.dto.BeginInvestigationRequest;
 import com.team5.kubernetesoutageescaperoom.dto.EvidenceViewRequest;
 import com.team5.kubernetesoutageescaperoom.dto.ActivityEventDto;
 import com.team5.kubernetesoutageescaperoom.dto.GameReportResponse;
@@ -7,6 +8,16 @@ import com.team5.kubernetesoutageescaperoom.dto.HintRequest;
 import com.team5.kubernetesoutageescaperoom.dto.HintResponse;
 import com.team5.kubernetesoutageescaperoom.dto.JoinSessionRequest;
 import com.team5.kubernetesoutageescaperoom.dto.MessageResponse;
+import com.team5.kubernetesoutageescaperoom.dto.RoomDetailsDto;
+import com.team5.kubernetesoutageescaperoom.dto.Room1LevelSubmitRequest;
+import com.team5.kubernetesoutageescaperoom.dto.Room1LevelSubmitResponse;
+import com.team5.kubernetesoutageescaperoom.dto.Room1StateResponse;
+import com.team5.kubernetesoutageescaperoom.dto.Room2LevelSubmitRequest;
+import com.team5.kubernetesoutageescaperoom.dto.Room2LevelSubmitResponse;
+import com.team5.kubernetesoutageescaperoom.dto.Room2StateResponse;
+import com.team5.kubernetesoutageescaperoom.dto.Room3LevelSubmitRequest;
+import com.team5.kubernetesoutageescaperoom.dto.Room3LevelSubmitResponse;
+import com.team5.kubernetesoutageescaperoom.dto.Room3StateResponse;
 import com.team5.kubernetesoutageescaperoom.dto.SessionStateResponse;
 import com.team5.kubernetesoutageescaperoom.dto.SubmitActionRequest;
 import com.team5.kubernetesoutageescaperoom.dto.SubmitActionResponse;
@@ -52,6 +63,53 @@ public class SessionController {
         return gameSessionService.getState(sessionCode);
     }
 
+    @GetMapping("/{sessionCode}/rooms/{roomId}")
+    public RoomDetailsDto getActiveRoom(@PathVariable String sessionCode, @PathVariable int roomId) {
+        return gameSessionService.getActiveRoomDetails(sessionCode, roomId);
+    }
+
+    @GetMapping("/{sessionCode}/rooms/1/state")
+    public Room1StateResponse getRoom1State(@PathVariable String sessionCode) {
+        return gameSessionService.getRoom1State(sessionCode);
+    }
+
+    @PostMapping("/{sessionCode}/rooms/1/levels/{levelNumber}/submit")
+    public Room1LevelSubmitResponse submitRoom1Level(
+            @PathVariable String sessionCode,
+            @PathVariable int levelNumber,
+            @RequestBody Room1LevelSubmitRequest request
+    ) {
+        return gameSessionService.submitRoom1Level(sessionCode, levelNumber, request);
+    }
+
+    @GetMapping("/{sessionCode}/rooms/2/state")
+    public Room2StateResponse getRoom2State(@PathVariable String sessionCode) {
+        return gameSessionService.getRoom2State(sessionCode);
+    }
+
+    @PostMapping("/{sessionCode}/rooms/2/levels/{levelNumber}/submit")
+    public Room2LevelSubmitResponse submitRoom2Level(
+            @PathVariable String sessionCode,
+            @PathVariable int levelNumber,
+            @RequestBody Room2LevelSubmitRequest request
+    ) {
+        return gameSessionService.submitRoom2Level(sessionCode, levelNumber, request);
+    }
+
+    @GetMapping("/{sessionCode}/rooms/3/state")
+    public Room3StateResponse getRoom3State(@PathVariable String sessionCode) {
+        return gameSessionService.getRoom3State(sessionCode);
+    }
+
+    @PostMapping("/{sessionCode}/rooms/3/levels/{levelNumber}/submit")
+    public Room3LevelSubmitResponse submitRoom3Level(
+            @PathVariable String sessionCode,
+            @PathVariable int levelNumber,
+            @RequestBody Room3LevelSubmitRequest request
+    ) {
+        return gameSessionService.submitRoom3Level(sessionCode, levelNumber, request);
+    }
+
     @PostMapping("/{sessionCode}/rooms/{roomId}/submit")
     public SubmitActionResponse submitAction(
             @PathVariable String sessionCode,
@@ -64,6 +122,20 @@ public class SessionController {
                 request == null ? null : request.playerName(),
                 request == null ? null : request.selectedActionId()
         );
+    }
+
+    @PostMapping("/{sessionCode}/rooms/{roomId}/begin")
+    public MessageResponse beginInvestigation(
+            @PathVariable String sessionCode,
+            @PathVariable int roomId,
+            @RequestBody BeginInvestigationRequest request
+    ) {
+        gameSessionService.beginInvestigation(
+                sessionCode,
+                roomId,
+                request == null ? null : request.playerName()
+        );
+        return new MessageResponse("Investigation started.");
     }
 
     @PostMapping("/{sessionCode}/rooms/{roomId}/hint")

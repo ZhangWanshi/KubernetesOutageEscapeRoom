@@ -84,6 +84,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>com.team5.kubernetesoutageescaperoom.KubernetesOutageEscapeRoomApplication</mainClass>
+                    <fork>true</fork>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
