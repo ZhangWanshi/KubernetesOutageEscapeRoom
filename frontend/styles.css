@@ -85,18 +85,19 @@ body.theme-jungle {
   --accent: #47d764;
   --accent-strong: #20a846;
   background:
-    radial-gradient(circle at 74% 16%, rgba(255, 221, 107, 0.78) 0 5rem, transparent 5.2rem),
+    linear-gradient(180deg, rgba(5, 18, 12, 0.22), rgba(4, 13, 9, 0.58)),
+    url("/assets/forest.jpg") center / cover fixed,
+    radial-gradient(circle at 74% 16%, rgba(255, 221, 107, 0.42) 0 5rem, transparent 5.2rem),
     linear-gradient(180deg, #123d35 0%, #0c2a25 40%, #081713 100%);
 }
 
 body.theme-jungle::before {
-  background:
-    linear-gradient(135deg, transparent 0 42%, rgba(23, 79, 54, 0.86) 43% 57%, transparent 58%) 0 100% / 4rem 35vh repeat-x,
-    linear-gradient(180deg, transparent 0%, rgba(9, 33, 23, 0.95) 80%);
+  opacity: 0.24;
+  background: linear-gradient(180deg, transparent 0%, rgba(4, 18, 11, 0.64) 100%);
 }
 
 body.theme-jungle::after {
-  opacity: 0.4;
+  opacity: 0.18;
   background-image:
     linear-gradient(120deg, transparent 0 44%, rgba(134, 239, 172, 0.38) 45% 46%, transparent 47%),
     linear-gradient(60deg, transparent 0 52%, rgba(34, 197, 94, 0.28) 53% 54%, transparent 55%);
@@ -106,14 +107,15 @@ body.theme-desert {
   --accent: #f0b44d;
   --accent-strong: #d78a1f;
   background:
+    linear-gradient(180deg, rgba(20, 24, 18, 0.22), rgba(25, 16, 9, 0.46)),
+    url("/assets/desert-landscape.jpg") center / cover fixed,
     radial-gradient(circle at 76% 14%, rgba(255, 224, 131, 0.9) 0 5.5rem, transparent 5.7rem),
     linear-gradient(180deg, #31556b 0%, #bd7b38 47%, #5c351d 100%);
 }
 
 body.theme-desert::before {
-  background:
-    radial-gradient(ellipse at 20% 100%, #d69a4b 0 35%, transparent 36%),
-    radial-gradient(ellipse at 76% 104%, #a9642d 0 42%, transparent 43%);
+  opacity: 0.24;
+  background: linear-gradient(180deg, transparent 0%, rgba(28, 17, 8, 0.58) 100%);
 }
 
 body.theme-desert::after {
@@ -127,14 +129,15 @@ body.theme-snow {
   --accent: #7ed6ff;
   --accent-strong: #4aa9d8;
   background:
-    radial-gradient(circle at 78% 12%, rgba(233, 249, 255, 0.84) 0 4.8rem, transparent 5rem),
+    linear-gradient(180deg, rgba(10, 24, 38, 0.18), rgba(9, 18, 28, 0.5)),
+    url("/assets/snowmountain.jpg") center / cover fixed,
+    radial-gradient(circle at 78% 12%, rgba(233, 249, 255, 0.42) 0 4.8rem, transparent 5rem),
     linear-gradient(180deg, #183956 0%, #315f82 48%, #e7f3fb 100%);
 }
 
 body.theme-snow::before {
-  background:
-    linear-gradient(135deg, transparent 0 35%, rgba(238, 247, 252, 0.9) 36% 65%, transparent 66%) 8% 100% / 55vw 52vh no-repeat,
-    linear-gradient(45deg, transparent 0 38%, rgba(173, 211, 231, 0.96) 39% 64%, transparent 65%) 70% 100% / 48vw 42vh no-repeat;
+  opacity: 0.2;
+  background: linear-gradient(180deg, transparent 0%, rgba(9, 23, 38, 0.5) 100%);
 }
 
 body.theme-snow::after {
@@ -148,38 +151,41 @@ body.theme-snow::after {
 }
 
 body.theme-container {
-  --accent: #38bdf8;
-  --accent-strong: #0284c7;
+  --accent: #f0b44d;
+  --accent-strong: #d78a1f;
   background:
-    radial-gradient(circle at 78% 16%, rgba(56, 189, 248, 0.34), transparent 16rem),
-    linear-gradient(180deg, #0b1720 0%, #102333 52%, #08111a 100%);
+    linear-gradient(180deg, rgba(11, 17, 24, 0.2), rgba(30, 18, 8, 0.48)),
+    url("/assets/desert-landscape.jpg") center / cover fixed,
+    radial-gradient(circle at 78% 16%, rgba(240, 180, 77, 0.34), transparent 16rem),
+    linear-gradient(180deg, #0b1720 0%, #4b321d 52%, #120b07 100%);
 }
 
 body.theme-container::before {
+  opacity: 0.2;
   background-image:
-    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-  background-size: 34px 34px;
+    linear-gradient(rgba(255, 232, 176, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 232, 176, 0.08) 1px, transparent 1px);
+  background-size: 44px 44px;
 }
 
 body.theme-container::after {
-  opacity: 0.36;
-  background:
-    linear-gradient(90deg, transparent 0 12%, rgba(56, 189, 248, 0.18) 13% 14%, transparent 15% 100%),
-    linear-gradient(0deg, transparent 0 28%, rgba(61, 220, 151, 0.16) 29% 30%, transparent 31% 100%);
-  background-size: 18rem 12rem;
+  opacity: 0.18;
+  background: linear-gradient(180deg, transparent 0%, rgba(19, 11, 5, 0.5) 100%);
 }
 
 body.theme-kubernetes {
   --accent: #60a5fa;
   --accent-strong: #2563eb;
   background:
-    radial-gradient(circle at 78% 16%, rgba(96, 165, 250, 0.34), transparent 15rem),
-    radial-gradient(circle at 18% 78%, rgba(61, 220, 151, 0.16), transparent 18rem),
+    linear-gradient(180deg, rgba(7, 17, 31, 0.18), rgba(8, 17, 29, 0.58)),
+    url("/assets/snowmountain.jpg") center / cover fixed,
+    radial-gradient(circle at 78% 16%, rgba(96, 165, 250, 0.24), transparent 15rem),
+    radial-gradient(circle at 18% 78%, rgba(61, 220, 151, 0.1), transparent 18rem),
     linear-gradient(180deg, #07111f 0%, #101d32 52%, #08111d 100%);
 }
 
 body.theme-kubernetes::before {
+  opacity: 0.2;
   background-image:
     linear-gradient(rgba(96, 165, 250, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(96, 165, 250, 0.08) 1px, transparent 1px);
@@ -395,17 +401,19 @@ body.screen-briefing .app-shell {
 
 .briefing-screen {
   display: grid;
-  min-height: calc(100vh - 0.9rem);
-  align-items: center;
+  min-height: 0;
+  align-items: start;
 }
 
 .mission-panel {
   width: 100%;
-  min-height: calc(100vh - 0.9rem);
+  min-height: 0;
   margin: 0 auto;
-  padding: 0.65rem 0.75rem;
+  padding: 0.55rem 0.65rem;
   border-color: rgba(71, 215, 100, 0.34);
-  background: rgba(7, 18, 15, 0.82);
+  background:
+    linear-gradient(180deg, rgba(4, 12, 9, 0.86), rgba(5, 18, 12, 0.74)),
+    rgba(7, 18, 15, 0.68);
 }
 
 .mission-hero {
@@ -414,13 +422,13 @@ body.screen-briefing .app-shell {
   gap: 1rem;
   align-items: flex-start;
   border-bottom: 1px solid var(--line);
-  padding-bottom: 0.45rem;
-  margin-bottom: 0.45rem;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.35rem;
 }
 
 .mission-hero h1 {
   margin-bottom: 0.1rem;
-  font-size: clamp(1.8rem, 3vw, 2.45rem);
+  font-size: clamp(1.45rem, 2.2vw, 2rem);
 }
 
 .mission-hero h2 {
@@ -433,7 +441,8 @@ body.screen-briefing .app-shell {
   max-width: 95ch;
   margin-bottom: 0.22rem;
   color: var(--muted);
-  line-height: 1.32;
+  line-height: 1.22;
+  font-size: 0.92rem;
 }
 
 .briefing-top-status {
@@ -625,10 +634,18 @@ body.screen-briefing .app-shell {
 
 .map-status {
   margin-bottom: 0.2rem;
-  color: var(--accent);
-  font-size: 0.78rem;
+  color: #166534;
+  font-size: 0.62rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.world-room-card.locked .map-status {
+  color: #7c2d12;
+}
+
+.world-room-card.completed .map-status {
+  color: #047857;
 }
 
 .map-room-card h4 {
@@ -703,6 +720,29 @@ body.screen-briefing .app-shell {
   margin-top: 0;
 }
 
+.map-support-grid .briefing-section {
+  border-color: rgba(255, 232, 169, 0.24);
+  padding: 0.42rem 0.5rem;
+  background: rgba(5, 10, 16, 0.5);
+}
+
+.map-support-grid .briefing-section h3 {
+  margin: 0 0 0.32rem;
+  font-size: 0.96rem;
+}
+
+.map-support-grid .briefing-section p {
+  margin-bottom: 0.24rem;
+  line-height: 1.22;
+  font-size: 0.86rem;
+}
+
+.map-support-grid .briefing-notice {
+  margin-bottom: 0.3rem;
+  padding: 0.34rem 0.45rem;
+  font-size: 0.82rem;
+}
+
 .mission-actions {
   display: none;
 }
@@ -715,6 +755,168 @@ body.screen-briefing .app-shell {
   min-width: min(100%, 18rem);
   min-height: 2.85rem;
   text-align: center;
+}
+
+.mission-panel > .briefing-main-grid {
+  display: none;
+}
+
+.level-map-page {
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(214, 236, 255, 0.62);
+  border-radius: 16px;
+  min-height: 0;
+  width: min(1120px, 100%);
+  margin: 0.45rem auto 0;
+  background: rgba(160, 216, 235, 0.16);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.34), inset 0 0 0 4px rgba(3, 16, 26, 0.34);
+}
+
+.level-map-image {
+  display: block;
+  width: 100%;
+  height: clamp(18rem, 50vh, 31rem);
+  object-fit: contain;
+  background: linear-gradient(180deg, #b9e8ff, #f7fbff);
+}
+
+.level-map-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.world-room-card {
+  position: absolute;
+  display: grid;
+  gap: 0.22rem;
+  width: min(21.5%, 15rem);
+  border: 2px solid rgba(76, 47, 18, 0.72);
+  border-radius: 10px;
+  padding: 0.45rem;
+  color: #2b1b0c;
+  background:
+    linear-gradient(180deg, rgba(255, 232, 169, 0.94), rgba(177, 117, 54, 0.88));
+  backdrop-filter: none;
+  box-shadow: 0 10px 24px rgba(61, 35, 10, 0.32);
+  pointer-events: auto;
+  transform: rotate(-1.5deg);
+}
+
+.world-room-1 {
+  left: 6%;
+  bottom: 13%;
+  border-color: rgba(54, 93, 32, 0.8);
+}
+
+.world-room-2 {
+  left: 39.2%;
+  bottom: 12%;
+  border-color: rgba(132, 78, 24, 0.82);
+  transform: rotate(0.6deg);
+}
+
+.world-room-3 {
+  right: 6%;
+  bottom: 13%;
+  border-color: rgba(75, 111, 138, 0.82);
+  transform: rotate(1.4deg);
+}
+
+.world-room-card.locked {
+  opacity: 0.88;
+  filter: saturate(0.85);
+}
+
+.world-room-card.current-room {
+  box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.22), 0 14px 32px rgba(0, 0, 0, 0.38);
+}
+
+.world-room-card h3 {
+  margin: 0;
+  color: #201104;
+  font-size: clamp(0.88rem, 1vw, 1.1rem);
+  text-transform: uppercase;
+}
+
+.world-room-card strong {
+  color: #2b1b0c;
+  font-size: clamp(0.68rem, 0.78vw, 0.82rem);
+  line-height: 1.2;
+}
+
+.world-level-list {
+  display: grid;
+  gap: 0.26rem;
+  margin-top: 0.08rem;
+}
+
+.world-level-button {
+  display: grid;
+  gap: 0.08rem;
+  min-height: 1.65rem;
+  border: 1px solid rgba(57, 31, 8, 0.32);
+  border-radius: 7px;
+  padding: 0.22rem 0.35rem;
+  color: #2b1b0c;
+  background: rgba(255, 247, 214, 0.48);
+  text-align: left;
+}
+
+.world-level-button span {
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.world-level-button small {
+  color: rgba(43, 27, 12, 0.78);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.world-level-button.active {
+  border-color: rgba(27, 94, 32, 0.78);
+  color: #04100b;
+  background: #4ade80;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.world-level-button.active small {
+  color: #1f2937;
+}
+
+.world-level-button.done {
+  border-color: rgba(34, 197, 94, 0.58);
+  color: #064e3b;
+  background: rgba(187, 247, 208, 0.65);
+}
+
+.world-level-button.locked {
+  opacity: 0.72;
+}
+
+.map-support-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 0.65rem;
+  width: min(1120px, 100%);
+  margin: 0.5rem auto 0;
+}
+
+.compact-rule-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.compact-rule-list span {
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  padding: 0.34rem 0.45rem;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.8rem;
 }
 
 .game-layout {
@@ -1528,6 +1730,25 @@ pre {
   .map-arrow {
     display: none;
   }
+
+  .level-map-overlay {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    padding: 0.6rem;
+    background: rgba(0, 0, 0, 0.42);
+  }
+
+  .world-room-card {
+    position: static;
+    width: 100%;
+  }
+
+  .map-support-grid,
+  .compact-rule-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 680px) {
@@ -1556,5 +1777,583 @@ pre {
   .session-chip,
   .difficulty-badge {
     width: 100%;
+  }
+}
+
+/* Cartoon game skin */
+@font-face {
+  font-family: "Luckiest Guy";
+  src: url("/assets/fonts/Luckiest_Guy/LuckiestGuy-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --game-ink: #2b1b0c;
+  --game-paper: #fff2bf;
+  --game-paper-dark: #d99a4e;
+  --game-brown: #7c4a1f;
+  --game-brown-dark: #3f2410;
+  --game-green: #45d65f;
+  --game-blue: #5ecbff;
+  --game-red: #f05252;
+  --game-yellow: #ffd166;
+  --panel: rgba(255, 238, 184, 0.9);
+  --panel-strong: rgba(255, 244, 205, 0.96);
+  --text: #fff9e8;
+  --muted: #f7dfab;
+  --line: rgba(75, 42, 14, 0.32);
+  --accent: var(--game-green);
+  font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  color: var(--game-ink);
+  text-shadow: none;
+}
+
+h1,
+h2,
+.world-room-card h3,
+.room-heading h2,
+.status-panel h2,
+.report-panel h2,
+.intro-panel h2,
+.mission-hero h1 {
+  font-family: "Luckiest Guy", "Trebuchet MS", sans-serif;
+  letter-spacing: 0.03em;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
+}
+
+h1,
+h2,
+.mission-hero h1,
+.room-heading h2,
+.status-panel h2 {
+  color: #fff8d8;
+}
+
+body.screen-join {
+  background:
+    linear-gradient(180deg, rgba(14, 56, 33, 0.28), rgba(4, 14, 9, 0.8)),
+    url("/assets/levels.png") center / cover fixed,
+    #122c1d;
+}
+
+.app-shell {
+  padding-top: 0.75rem;
+}
+
+.panel,
+.intro-panel,
+.mission-panel,
+.status-panel,
+.room1-panel,
+.room2-panel,
+.room3-panel,
+.briefing-section,
+.report-panel,
+.modal-card {
+  border: 3px solid rgba(82, 45, 16, 0.74);
+  border-radius: 16px;
+  color: var(--game-ink);
+  background:
+    linear-gradient(180deg, rgba(255, 243, 199, 0.94), rgba(220, 150, 72, 0.9)),
+    url("/assets/ui/adventure/panel_brown.png") center / 100% 100%;
+  box-shadow:
+    0 10px 0 rgba(52, 29, 11, 0.35),
+    0 24px 54px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.32);
+  backdrop-filter: none;
+}
+
+.mission-panel {
+  border-color: rgba(35, 92, 43, 0.72);
+  background:
+    linear-gradient(180deg, rgba(8, 55, 33, 0.7), rgba(4, 24, 16, 0.86)),
+    url("/assets/forest.jpg") center / cover fixed;
+}
+
+.top-bar,
+.mission-hero,
+.room-heading {
+  border-bottom: 3px dashed rgba(255, 229, 143, 0.5);
+}
+
+.mission-hero h2,
+.mission-hero p,
+.room-heading p,
+.level-prompt,
+.intro-panel p,
+.briefing-section p,
+.plain-list,
+.activity-list {
+  color: #3a2814;
+  font-weight: 700;
+}
+
+.mission-hero h2,
+.mission-hero p {
+  color: #fff2bf;
+}
+
+button,
+.primary-button,
+.level-map-button {
+  border: 2px solid #5b3214;
+  border-radius: 12px;
+  color: #fff8dc;
+  background:
+    linear-gradient(180deg, #c47a32, #7a431d),
+    url("/assets/ui/adventure/button_brown.png") center / 100% 100%;
+  box-shadow:
+    0 5px 0 #3f2410,
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+button:hover:not(:disabled),
+.primary-button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.08) saturate(1.1);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #3f2410;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.55);
+  opacity: 0.68;
+}
+
+input,
+.terminal-input {
+  border: 3px solid rgba(85, 49, 19, 0.66);
+  border-radius: 12px;
+  color: var(--game-ink);
+  background: #fff4cf;
+  box-shadow: inset 0 3px 0 rgba(120, 70, 24, 0.18);
+  font-weight: 800;
+}
+
+.session-chip,
+.difficulty-badge,
+.briefing-chip,
+.metric-row,
+.status-box {
+  border: 2px solid rgba(82, 45, 16, 0.48);
+  border-radius: 14px;
+  color: var(--game-ink);
+  background: rgba(255, 242, 191, 0.86);
+}
+
+.briefing-chip span,
+.briefing-chip small,
+.metric-row span,
+.activity-list,
+.plain-list {
+  color: #5c3a18;
+}
+
+.briefing-player-list li {
+  border: 2px solid rgba(29, 112, 49, 0.56);
+  background: #c8f7a8;
+  color: #12451c;
+  box-shadow: 0 4px 0 rgba(19, 78, 32, 0.28);
+}
+
+.briefing-player-list li small {
+  color: #0d7a28;
+}
+
+.level-map-page {
+  border: 5px solid #5d3517;
+  border-radius: 22px;
+  background: #bdefff;
+  box-shadow: 0 10px 0 rgba(65, 38, 16, 0.42), 0 30px 70px rgba(0, 0, 0, 0.42);
+}
+
+.world-room-card {
+  border-width: 3px;
+  background:
+    linear-gradient(180deg, rgba(255, 235, 160, 0.98), rgba(197, 125, 48, 0.94)),
+    url("/assets/ui/adventure/banner_hanging.png") center / 100% 100%;
+}
+
+.world-level-button {
+  border: 2px solid rgba(70, 37, 9, 0.38);
+  background: rgba(255, 248, 218, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.world-level-button.active {
+  animation: pulseGlow 1.4s ease-in-out infinite;
+}
+
+.status-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 244, 204, 0.96), rgba(224, 161, 82, 0.94)),
+    url("/assets/ui/adventure/panel_brown_arrows.png") center / 100% 100%;
+}
+
+.status-box h3 {
+  margin-top: 0;
+  color: #704111;
+  font-family: "Luckiest Guy", "Trebuchet MS", sans-serif;
+}
+
+.health-track {
+  border: 2px solid rgba(65, 38, 16, 0.54);
+  border-radius: 999px;
+  height: 1rem;
+  background: rgba(255, 248, 218, 0.85);
+  overflow: hidden;
+}
+
+.health-good,
+.health-warning,
+.health-low {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.room-heading {
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.room1-panel,
+.room2-panel,
+.room3-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 245, 207, 0.96), rgba(221, 158, 78, 0.92)),
+    url("/assets/ui/adventure/panel_grid_paper.png") center / 100% 100%;
+}
+
+.yaml-card,
+.terminal-card,
+.selected-order,
+.terminal-input-panel {
+  border: 3px solid rgba(72, 42, 16, 0.58);
+  border-radius: 14px;
+  color: #2b1b0c;
+  background: #fff4ce;
+  box-shadow: inset 0 3px 0 rgba(120, 70, 24, 0.16);
+}
+
+.option-grid button,
+.match-item,
+.drop-slot,
+.action-button,
+.evidence-button {
+  border: 2px solid rgba(74, 43, 15, 0.5);
+  border-radius: 14px;
+  color: #2b1b0c;
+  background: #fff1ba;
+  text-shadow: none;
+  box-shadow: 0 4px 0 rgba(74, 43, 15, 0.22);
+}
+
+.option-grid button.option-correct,
+.match-item.pair-correct,
+.level-feedback.success,
+.inline-answer-feedback.success,
+.feedback-panel.success {
+  border-color: #18803a;
+  color: #073b18;
+  background: #b9f58c;
+}
+
+.option-grid button.option-incorrect,
+.match-item.pair-incorrect,
+.level-feedback.danger,
+.feedback-panel.danger {
+  border-color: #a72828;
+  color: #581313;
+  background: #ffb0a8;
+}
+
+.level-feedback,
+.inline-answer-feedback {
+  border-width: 3px;
+  border-radius: 14px;
+  box-shadow: 0 5px 0 rgba(65, 38, 16, 0.2);
+}
+
+.evidence-type {
+  border-radius: 10px;
+  color: #2b1b0c;
+  background: #ffd166;
+}
+
+.evidence-title,
+.action-title,
+.map-support-grid .briefing-section h3,
+.report-panel h3 {
+  color: #3a210c;
+}
+
+.evidence-summary,
+.action-id,
+.root-panel p,
+.terminal-input-panel p {
+  color: #5c3a18;
+}
+
+.modal-backdrop {
+  background: rgba(12, 7, 3, 0.68);
+}
+
+.modal-card {
+  color: var(--game-ink);
+}
+
+.report-grid div {
+  border: 2px solid rgba(82, 45, 16, 0.48);
+  border-radius: 16px;
+  background: rgba(255, 248, 218, 0.78);
+  box-shadow: 0 5px 0 rgba(82, 45, 16, 0.22);
+}
+
+.report-grid strong,
+.report-grid span {
+  color: var(--game-ink);
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 0 rgba(74, 222, 128, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75), 0 0 24px rgba(74, 222, 128, 0.8);
+  }
+}
+
+/* Readability pass for cartoon theme */
+body,
+button,
+input {
+  font-size: 16px;
+}
+
+p,
+li,
+small,
+span,
+label,
+.level-prompt,
+.metric-row,
+.plain-list,
+.activity-list,
+.evidence-summary,
+.action-id,
+.terminal-input-panel p,
+.root-panel p,
+.learning-list p,
+.report-panel p {
+  color: #2f2112;
+  text-shadow: none;
+}
+
+.mission-hero h1,
+.mission-hero h2,
+.mission-hero p,
+.room-heading h2,
+.room-heading p,
+.eyebrow {
+  color: #fff6d8;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.42), 0 0 14px rgba(0, 0, 0, 0.35);
+}
+
+.panel,
+.briefing-section,
+.status-box,
+.metric-row,
+.report-grid div,
+.modal-card,
+.selected-action {
+  color: #2f2112;
+}
+
+.panel h2,
+.panel h3,
+.briefing-section h3,
+.status-box h3,
+.modal-card h2,
+.report-panel h2,
+.report-panel h3,
+.room1-panel h3,
+.room2-panel h3,
+.room3-panel h3 {
+  color: #3a210c;
+  text-shadow: none;
+}
+
+.room-heading h2,
+.status-panel > h2 {
+  color: #fff3bd;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.44);
+}
+
+.status-panel > h2 {
+  color: #3a210c;
+  text-shadow: none;
+}
+
+.world-room-card h3,
+.world-room-card strong,
+.world-level-button span,
+.world-level-button small {
+  color: #241407;
+  text-shadow: none;
+}
+
+.world-level-button.active,
+.world-level-button.active span,
+.world-level-button.active small {
+  color: #06170a;
+}
+
+.world-level-button.locked,
+.world-level-button.locked span,
+.world-level-button.locked small {
+  color: #5e4c37;
+}
+
+.briefing-chip strong,
+.session-chip,
+.difficulty-badge,
+.metric-row strong,
+.report-grid strong {
+  color: #1f1408;
+}
+
+.briefing-chip span,
+.briefing-chip small,
+.metric-row span,
+.report-grid span {
+  color: #5a3816;
+}
+
+.option-grid button,
+.match-item,
+.drop-slot,
+.action-button,
+.evidence-button,
+.world-level-button {
+  font-size: 0.96rem;
+  line-height: 1.25;
+}
+
+.match-item small,
+.evidence-summary,
+.action-id {
+  color: #553616;
+  font-size: 0.86rem;
+}
+
+.yaml-card,
+.terminal-card,
+pre {
+  color: #1e1408;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.terminal-input {
+  color: #1e1408;
+  font-size: 1rem;
+}
+
+.level-feedback.success,
+.inline-answer-feedback.success,
+.feedback-panel.success,
+.option-grid button.option-correct,
+.match-item.pair-correct {
+  color: #063414;
+}
+
+.level-feedback.danger,
+.feedback-panel.danger,
+.option-grid button.option-incorrect,
+.match-item.pair-incorrect,
+.warning-text,
+.error-text {
+  color: #5b1212;
+}
+
+.primary-button,
+button,
+.level-map-button {
+  color: #fff8dc;
+  font-size: 0.98rem;
+}
+
+.modal-heading button {
+  min-width: 5rem;
+}
+
+.activity-list {
+  font-size: 0.92rem;
+}
+
+.map-support-grid .briefing-section p,
+.compact-rule-list span {
+  color: #2f2112;
+  font-size: 0.9rem;
+}
+
+.room-level-node span,
+.room-level-node strong,
+.room-level-node small {
+  color: #2f2112;
+  text-shadow: none;
+}
+
+.room-level-node.active span,
+.room-level-node.active strong,
+.room-level-node.active small {
+  color: #06170a;
+}
+
+.sound-toggle {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 80;
+  border: 3px solid #2b1708;
+  border-radius: 999px;
+  padding: 0.75rem 1.15rem;
+  background: linear-gradient(180deg, #ffcf4f, #f07824);
+  color: #251306;
+  box-shadow: 0 8px 0 #6d2d13, 0 16px 26px rgba(0, 0, 0, 0.34);
+  font-family: var(--game-font);
+  font-size: 0.9rem;
+  letter-spacing: 0;
+}
+
+.sound-toggle:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.sound-toggle.enabled {
+  background: linear-gradient(180deg, #83e66e, #1f9b55);
+  box-shadow: 0 8px 0 #0b5f34, 0 16px 26px rgba(0, 0, 0, 0.34);
+  color: #062214;
+}
+
+@media (max-width: 700px) {
+  .sound-toggle {
+    right: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.65rem 0.95rem;
+    font-size: 0.78rem;
   }
 }

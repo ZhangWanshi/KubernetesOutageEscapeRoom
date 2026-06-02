@@ -25,6 +25,84 @@ const ROOM1_CORRECT_PAIRS = {
   "database-service": "Stores application data",
 };
 
+const GAME_SOUNDS = {
+  click: "/assets/sounds/universfield-click-button-app-147358.mp3",
+  correct: "/assets/sounds/ui-success-chime.mp3",
+  wrong: "/assets/sounds/47313572-ui-sounds-pack-5-2-359749.mp3",
+  unlock: "/assets/sounds/dragon-studio-heavy-door-unlocking-515258.mp3",
+  victory: "/assets/sounds/soundshelfstudio-ui-success-chime-513565.mp3",
+};
+
+const AMBIENCE_SOUNDS = {
+  forest: "/assets/sounds/fxprosound-winter-rain-in-oak-forest-loop-185672.mp3",
+  desert: "/assets/sounds/tanweraman-desert-wind-2-350417.mp3",
+  snow: "/assets/sounds/snow-storm-wind-ambience-272426.mp3",
+};
+
+let gameAudioContext;
+
+function getGameAudioContext() {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+  if (!gameAudioContext) {
+    gameAudioContext = new AudioContextClass();
+  }
+  if (gameAudioContext.state === "suspended") {
+    gameAudioContext.resume().catch(() => {});
+  }
+  return gameAudioContext;
+}
+
+function playFallbackTone(name, volumeOverride) {
+  const context = getGameAudioContext();
+  if (!context) return;
+
+  const patterns = {
+    click: [420],
+    correct: [660, 880],
+    wrong: [180, 120],
+    unlock: [360, 540, 720],
+    victory: [520, 660, 780, 980],
+  };
+  const frequencies = patterns[name] || [440];
+  const baseVolume = volumeOverride ?? (name === "click" ? 0.12 : 0.2);
+
+  frequencies.forEach((frequency, index) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const start = context.currentTime + index * 0.09;
+    const end = start + (name === "click" ? 0.06 : 0.12);
+
+    oscillator.type = name === "wrong" ? "sawtooth" : "triangle";
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.001, start);
+    gain.gain.exponentialRampToValueAtTime(baseVolume, start + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.001, end);
+
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(end + 0.02);
+  });
+}
+
+function playGameSound(name, volumeOverride) {
+  const src = GAME_SOUNDS[name];
+  playFallbackTone(name, volumeOverride);
+  if (!src) return;
+  const audio = new Audio(encodeURI(src));
+  audio.volume = volumeOverride ?? (name === "click" ? 0.35 : name === "unlock" ? 0.48 : 0.6);
+  audio.play().catch(() => {});
+}
+
+function ambienceKeyFor(screen, activeRoomId) {
+  if (screen === "final") return "snow";
+  if (screen === "briefing") return "forest";
+  if (activeRoomId === 2) return "desert";
+  if (activeRoomId === 3) return "snow";
+  return "forest";
+}
+
 function App() {
   const [screen, setScreen] = React.useState("join");
   const [playerName, setPlayerName] = React.useState(localStorage.getItem("escape.playerName") || "");
@@ -46,6 +124,8 @@ function App() {
   const [error, setError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [report, setReport] = React.useState(null);
+  const [soundEnabled, setSoundEnabled] = React.useState(localStorage.getItem("escape.soundEnabled") === "true");
+  const ambienceRef = React.useRef(null);
 
   React.useEffect(() => {
     document.body.classList.remove("screen-join", "screen-briefing", "screen-room", "screen-final");
@@ -75,6 +155,78 @@ function App() {
     return () => window.clearInterval(handle);
   }, [sessionCode, playerName, screen]);
 
+  React.useEffect(() => {
+    const handleClick = (event) => {
+      if (soundEnabled && event.target.closest("button")) {
+        playGameSound("click");
+      }
+    };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [soundEnabled]);
+
+  React.useEffect(() => {
+    if (!soundEnabled) {
+      ambienceRef.current?.pause();
+      return undefined;
+    }
+    const key = ambienceKeyFor(screen, activeRoomId);
+    const src = AMBIENCE_SOUNDS[key];
+    if (!src) return undefined;
+    let cancelled = false;
+
+    function startAmbience() {
+      if (cancelled) return;
+      if (ambienceRef.current?.dataset.src === src) {
+        ambienceRef.current.play().catch(() => {});
+        return;
+      }
+      if (ambienceRef.current) {
+        ambienceRef.current.pause();
+      }
+      const audio = new Audio(src);
+      audio.loop = true;
+      audio.volume = 0.18;
+      audio.dataset.src = src;
+      ambienceRef.current = audio;
+      audio.play().catch(() => {});
+    }
+
+    document.addEventListener("click", startAmbience, { once: true });
+    startAmbience();
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener("click", startAmbience);
+    };
+  }, [screen, activeRoomId, soundEnabled]);
+
+  React.useEffect(() => {
+    if (!feedback || !soundEnabled) return;
+    playGameSound(feedback.correct ? "correct" : "wrong");
+  }, [feedback?.message, feedback?.correct, soundEnabled]);
+
+  React.useEffect(() => {
+    if (briefingNotice && soundEnabled) {
+      playGameSound("unlock");
+    }
+  }, [briefingNotice, soundEnabled]);
+
+  React.useEffect(() => {
+    if (screen === "final" && soundEnabled) {
+      playGameSound("victory");
+    }
+  }, [screen, soundEnabled]);
+
+  function toggleSound() {
+    getGameAudioContext();
+    if (!soundEnabled) {
+      setSoundEnabled(true);
+      localStorage.setItem("escape.soundEnabled", "true");
+    }
+    playGameSound("correct", 0.22);
+  }
+
   async function createSession() {
     const name = playerName.trim();
     if (!name) {
@@ -94,7 +246,7 @@ function App() {
       return;
     }
     setError("");
-    await joinSession(code, name);
+    await joinSession(code, name, "briefing");
   }
 
   async function joinSession(code, name, nextScreen = "room") {
@@ -437,6 +589,15 @@ function App() {
 
   return (
     <main className="app-shell">
+      <button
+        type="button"
+        className={`sound-toggle ${soundEnabled ? "enabled" : ""}`}
+        onClick={toggleSound}
+        aria-label={soundEnabled ? "Turn game sound off" : "Turn game sound on"}
+      >
+        {soundEnabled ? "Test Sound" : "Enable Sound"}
+      </button>
+
       {screen === "join" && (
         <header className="top-bar">
           <div>
@@ -661,6 +822,70 @@ function MissionBriefing({ sessionCode, playerName, players = [], startGame, ope
               </ul>
             </div>
           </div>
+        </div>
+
+        <section className="level-map-page" aria-label="Escape room level map">
+          <img className="level-map-image" src="/assets/levels.png" alt="Escape route map through forest, desert, and snow mountain rooms" />
+          <div className="level-map-overlay">
+            {rooms.map((room) => (
+              <article
+                key={room.id}
+                className={`world-room-card world-room-${room.id} ${room.locked ? "locked" : "available"} ${room.completed ? "completed" : ""} ${activeRoom === room.id && !room.completed ? "current-room" : ""}`}
+              >
+                <p className="map-status">{room.locked ? "Locked" : room.completed ? "Completed" : "Current Mission"}</p>
+                <h3>Room {room.id}</h3>
+                <strong>{room.title}</strong>
+                <div className="world-level-list">
+                  {room.levels.map((level, levelIndex) => {
+                    const levelNumber = levelIndex + 1;
+                    const done = room.completed || levelNumber < room.currentLevel;
+                    const active = !room.locked && !room.completed && activeRoom === room.id && levelNumber === room.currentLevel;
+                    return active ? (
+                      <button type="button" key={level} className="world-level-button active" onClick={() => openRoom(room.id)}>
+                        <span>Level {levelNumber}</span>
+                        <small>{level}</small>
+                      </button>
+                    ) : (
+                      <div key={level} className={`world-level-button ${done ? "done" : "locked"}`}>
+                        <span>Level {levelNumber}</span>
+                        <small>{level}</small>
+                      </div>
+                    );
+                  })}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <div className="map-support-grid">
+          <section className="briefing-section room1-detail">
+            <h3>{room3Unlocked && !room3Completed ? "Room 3: Kubernetes Service Routing Fix" : room2Unlocked && !room2Completed ? "Room 2: Container Recovery Operations" : "Room 1: Microservice Incident Response"}</h3>
+            {notice && <p className="briefing-notice">{notice}</p>}
+            {room3Unlocked && !room3Completed ? (
+              <>
+                <p><strong>Objective:</strong> Inspect checkout-service endpoints, follow a service routing investigation path, and patch the selector to app=checkout.</p>
+                <p><strong>Levels:</strong> Endpoint Command, Debugging Sequence, Selector Fix Command.</p>
+              </>
+            ) : room2Unlocked && !room2Completed ? (
+              <>
+                <p><strong>Objective:</strong> Recover the order-service container by identifying its failed status, rebuilding the startup sequence, and selecting the safest rollback action.</p>
+                <p><strong>Levels:</strong> Status Inspection, Lifecycle Sequence, Safe Recovery.</p>
+              </>
+            ) : (
+              <>
+                <p><strong>Objective:</strong> Restore the customer-api flow by checking health, mapping responsibilities, and fixing DB_HOST.</p>
+                <p><strong>Levels:</strong> Health Check, Responsibility Mapping, Configuration Recovery.</p>
+              </>
+            )}
+          </section>
+
+          <section className="briefing-section compact-rules">
+            <h3>Rules</h3>
+            <div className="compact-rule-list">
+              {rules.slice(0, 4).map((rule) => <span key={rule}>{rule}</span>)}
+            </div>
+          </section>
         </div>
 
         <div className="briefing-main-grid">
