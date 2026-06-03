@@ -13,6 +13,21 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const sfx = (k) => { if (window.Sfx) window.Sfx.play(k); };
 
+const SCORE_CONFIG = {
+  base:        { Easy: 100, Medium: 150, Hard: 200 },
+  wrongPenalty:{ Easy: 10,  Medium: 20,  Hard: 30  },
+  hintPenalty: [10, 20, 30],
+  timeLimit:   { Easy: 600, Medium: 900, Hard: 1200 },
+};
+window.SCORE_CONFIG = SCORE_CONFIG;
+
+function calcRoomScore(diff, wrongAnswers, hintsUsed) {
+  const base = SCORE_CONFIG.base[diff] || 100;
+  const wrongPen = (SCORE_CONFIG.wrongPenalty[diff] || 10) * wrongAnswers;
+  const hintPen = SCORE_CONFIG.hintPenalty.slice(0, Math.min(hintsUsed, 3)).reduce((a, b) => a + b, 0);
+  return Math.max(0, base - wrongPen - hintPen);
+}
+
 // Colour palette for auto-assigning avatar colours to players not in the original AVPAL
 const _AUTO_COLORS = ['#2E86DE','#2BB673','#9B59B6','#E67E22','#16A39A','#E2554A','#E84393','#F4B73C','#3498DB','#8E44AD'];
 function _nameColor(name) {
@@ -40,6 +55,8 @@ function App() {
   const [claims, setClaims] = React.useState(0);
   const [soundOn, setSoundOnState] = React.useState(() => !window.Sfx || window.Sfx.isOn());
   const [sessionStats, setSessionStats] = React.useState(null);
+  const [roomAttempts, setRoomAttempts] = React.useState({});
+  const [totalScore, setTotalScore] = React.useState(0);
 
   // Keep session stats in sync with the backend; register any new players in AVPAL
   React.useEffect(() => {
@@ -109,18 +126,64 @@ function App() {
     setRooms((prev) => prev.map((r) => r.id === room.id && r.status === 'available' ? { ...r, status: 'attempted' } : r));
     setView('room');
     if (window.Ambience) window.Ambience.forRoom(room.id);
+    setRoomAttempts((prev) => {
+      if (prev[room.id]) return prev;
+      return { ...prev, [room.id]: { wrongAnswers: 0, hintsUsed: 0, startTime: Date.now() } };
+    });
   };
   const openResults = (room, res) => {
+    const attempt = roomAttempts[room.id] || { wrongAnswers: 0, hintsUsed: 0 };
+    const roomScore = calcRoomScore(room.diff, attempt.wrongAnswers, attempt.hintsUsed);
+
+    if (res.correct) {
+      setTotalScore(prev => prev + (SCORE_CONFIG.base[room.diff] || 100));
+    } else {
+      setTotalScore(prev => prev - (SCORE_CONFIG.wrongPenalty[room.diff] || 10));
+      setRoomAttempts((prev) => {
+        const curr = prev[room.id] || { wrongAnswers: 0, hintsUsed: 0 };
+        return { ...prev, [room.id]: { ...curr, wrongAnswers: curr.wrongAnswers + 1 } };
+      });
+    }
+
+    const enhancedResult = {
+      ...res,
+      roomScore: res.correct ? roomScore : 0,
+      wrongAnswers: attempt.wrongAnswers + (res.correct ? 0 : 1),
+      hintsUsed: attempt.hintsUsed,
+    };
+
     if (res.correct) completeRoom(room.id, res.stars);
     setActiveRoom(room);
-    setResult(res);
+    setResult(enhancedResult);
     setView('results');
     sfx(res.correct ? 'win' : 'lose');
   };
+  const recordHintUsed = React.useCallback((roomId, hintPenalty) => {
+    setRoomAttempts((prev) => {
+      const curr = prev[roomId] || { wrongAnswers: 0, hintsUsed: 0 };
+      return { ...prev, [roomId]: { ...curr, hintsUsed: curr.hintsUsed + 1 } };
+    });
+    setTotalScore(prev => prev - hintPenalty);
+  }, []);
   const simulateWin = () => {
     const r = rooms.find((x) => x.status === 'available') || rooms.find((x) => x.status === 'attempted');
     if (r) completeRoom(r.id, 3);
   };
+
+  // Dev helper: window.__jumpRoom('r3') jumps straight to any room
+  React.useEffect(() => {
+    window.__jumpRoom = (roomId) => {
+      setRooms((prev) => prev.map((r) => {
+        const n = parseInt(r.id.replace('r', ''), 10);
+        const target = parseInt(roomId.replace('r', ''), 10);
+        if (n < target) return { ...r, status: 'completed', score: 3 };
+        if (n === target) return { ...r, status: 'available' };
+        return r;
+      }));
+      const room = window.MapScene.ROOMS_INIT.find((r) => r.id === roomId);
+      if (room) { setActiveRoom({ ...room, status: 'available' }); setView('room'); }
+    };
+  }, [completeRoom]);
   const reset = () => setRooms(clone(window.MapScene.ROOMS_INIT));
 
   const finishJoin = (profile) => {
@@ -173,6 +236,12 @@ function App() {
     chars: r.id === activeRoomId ? playerNames : [],
   }));
 
+  // liveScore projects the current in-progress room's base score onto the running total,
+  // so wrong-answer and hint penalties are immediately visible even before room completion.
+  const needsProjection = view === 'room' || (view === 'results' && result && !result.correct);
+  const roomProjection = needsProjection && activeRoom ? (SCORE_CONFIG.base[activeRoom.diff] || 0) : 0;
+  const liveScore = Math.max(0, totalScore + roomProjection);
+
   const ctx = {
     rooms: roomsWithChars, view, activeRoom, result, lobbyTarget, util, soundOn, player,
     rewardsClaimed: claims >= 2,
@@ -181,6 +250,7 @@ function App() {
     navigate, openRoom, openResults, simulateWin, reset, finishJoin,
     completeRoom, openUtil, closeUtil, setSoundOn, claimReward,
     playSfx: sfx,
+    roomAttempts, totalScore, liveScore, recordHintUsed,
   };
 
   // The join screen is its own full-bleed layout — render it without app chrome.

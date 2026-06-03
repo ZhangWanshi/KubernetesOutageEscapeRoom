@@ -40,14 +40,12 @@ const UTIL_ICONS = {
 };
 
 function TopBar() {
-  const { player, sessionStats } = window.useGame();
+  const { player, sessionStats, liveScore } = window.useGame();
   const name = (player && player.name) || 'Guest';
   const av = player ? player.marker : '?';
   const avBg = player ? player.color : null;
-  // Derive completed stars from backend currentRoomId so all clients agree
   const completedRooms = sessionStats && sessionStats.currentRoomId ? sessionStats.currentRoomId - 1 : 0;
   const stars = completedRooms;
-  const score = sessionStats ? sessionStats.score : 0;
   return (
     <div className="topbar">
       <div className="brand" style={{ fontWeight: 700, fontSize: 30 }}>
@@ -56,7 +54,7 @@ function TopBar() {
       <div className="spacer" />
       <div className="hud">
         <div className="stat"><span className="ic" style={{ background: 'var(--gold)', color: 'var(--navy)' }}>&#9733;</span><span>{stars}</span></div>
-        <div className="stat"><span className="ic" style={{ background: 'var(--coral)' }}>&#10022;</span><span>{score}</span></div>
+        <div className="stat"><span className="ic" style={{ background: 'var(--coral)' }}>&#10022;</span><span>{liveScore}</span></div>
         <div className="me"><span className="nm">{name}</span><span className="av" style={avBg ? { background: avBg } : null}>{av}</span></div>
       </div>
     </div>

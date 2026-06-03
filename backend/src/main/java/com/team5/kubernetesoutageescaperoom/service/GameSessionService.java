@@ -459,9 +459,9 @@ public class GameSessionService {
                 return new HintResponse(0, "No more hints available.", session.getScore(), session.getServiceHealth());
             }
 
-            if (session.getCurrentRoomHintsUsed() == 0) {
+            if (session.getCurrentRoomHintsUsed() < 3) {
                 scoringService.applyHint(session);
-                session.setCurrentRoomHintsUsed(1);
+                session.setCurrentRoomHintsUsed(session.getCurrentRoomHintsUsed() + 1);
                 activityService.add(session, playerName.trim() + " requested a hint in " + room.getName());
             }
             sessionRepository.save(session);

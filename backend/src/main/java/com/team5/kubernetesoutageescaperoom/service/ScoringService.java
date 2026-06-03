@@ -16,8 +16,11 @@ public class ScoringService {
         session.setWrongAttempts(session.getWrongAttempts() + 1);
     }
 
+    private static final int[] HINT_PENALTIES = {10, 20, 30};
+
     public void applyHint(GameSession session) {
-        session.setScore(Math.max(0, session.getScore() - 5));
+        int idx = Math.min(session.getCurrentRoomHintsUsed(), HINT_PENALTIES.length - 1);
+        session.setScore(Math.max(0, session.getScore() - HINT_PENALTIES[idx]));
         session.setHintsUsed(session.getHintsUsed() + 1);
     }
 }

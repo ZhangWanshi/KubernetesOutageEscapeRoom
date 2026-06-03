@@ -15,8 +15,8 @@ function ResultsView() {
         <div className="screen-inner narrow">
           <div className={'result-hero ' + (win ? 'win' : 'lose')}>
             <div className="rh-burst" />
-            <div className="res-eyebrow">{win ? 'Island cleared' : 'Not quite'}</div>
-            <h1>{win ? room.title.replace(/^The /, '') + ' solved!' : 'The bug got away'}</h1>
+            <div className="res-eyebrow">{win ? 'Levels Completed!' : 'Not quite'}</div>
+            <h1>{win ? room.title.replace(/^The /, '') + ' — all levels cleared!' : 'The bug got away'}</h1>
             <div className="res-stars">
               {[0, 1, 2].map((i) => (
                 <span key={i} className={'rs' + (i < res.stars ? ' on' : '')} style={{ animationDelay: i * 0.12 + 's' }}>
@@ -33,10 +33,27 @@ function ResultsView() {
           <div className="res-cols">
             <div className="card pad">
               <div className="eyebrow">Score breakdown</div>
-              <div className="bd-row"><span>Root cause</span><b className={res.causeCorrect ? 'pos' : 'neg'}>{res.causeCorrect ? 'correct +130' : 'missed'}</b></div>
-              <div className="bd-row"><span>Remediation</span><b className={res.fixCorrect ? 'pos' : 'neg'}>{res.fixCorrect ? 'correct +250' : 'wrong +0'}</b></div>
-              <div className="bd-row"><span>Hint used</span><b className={res.hintUsed ? 'neg' : 'mut'}>{res.hintUsed ? '−1★' : 'none'}</b></div>
-              <div className="bd-row total"><span>XP earned</span><b>+{res.xp}</b></div>
+              {win ? (
+                <>
+                  <div className="bd-row"><span>Base score ({room.diff})</span><b>+{(window.SCORE_CONFIG.base || {})[room.diff] || 0}</b></div>
+                  {res.wrongAnswers > 0 && (
+                    <div className="bd-row"><span>Wrong attempts (×{res.wrongAnswers})</span><b className="neg">−{((window.SCORE_CONFIG.wrongPenalty || {})[room.diff] || 0) * res.wrongAnswers}</b></div>
+                  )}
+                  {res.hintsUsed > 0 && (
+                    <div className="bd-row"><span>Hints used (×{res.hintsUsed})</span><b className="neg">−{(window.SCORE_CONFIG.hintPenalty || []).slice(0, Math.min(res.hintsUsed, 3)).reduce((a, b) => a + b, 0)}</b></div>
+                  )}
+                  <div className="bd-row total"><span>Room score</span><b>{res.roomScore}</b></div>
+                </>
+              ) : (
+                <>
+                  <div className="bd-row"><span>Base score ({room.diff})</span><b>+{(window.SCORE_CONFIG.base || {})[room.diff] || 0}</b></div>
+                  <div className="bd-row"><span>Wrong answers (×{res.wrongAnswers})</span><b className="neg">−{((window.SCORE_CONFIG.wrongPenalty || {})[room.diff] || 0) * res.wrongAnswers}</b></div>
+                  {res.hintsUsed > 0 && (
+                    <div className="bd-row"><span>Hints used (×{res.hintsUsed})</span><b className="neg">−{(window.SCORE_CONFIG.hintPenalty || []).slice(0, Math.min(res.hintsUsed, 3)).reduce((a, b) => a + b, 0)}</b></div>
+                  )}
+                  <div className="bd-row total"><span>Score if completed now</span><b>{Math.max(0, ((window.SCORE_CONFIG.base || {})[room.diff] || 0) - ((window.SCORE_CONFIG.wrongPenalty || {})[room.diff] || 0) * res.wrongAnswers - (window.SCORE_CONFIG.hintPenalty || []).slice(0, Math.min(res.hintsUsed || 0, 3)).reduce((a, b) => a + b, 0))}</b></div>
+                </>
+              )}
             </div>
             <div className="card pad">
               <div className="eyebrow">Squad debrief</div>

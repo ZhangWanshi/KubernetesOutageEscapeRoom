@@ -1,11 +1,9 @@
 /* DashboardView.jsx — player profile, expedition progress & squad. Port of
    renderDashboard(), with stats derived live from the rooms state. */
 function DashboardView() {
-  const { rooms, sessionStats, player, sessionCode } = window.useGame();
+  const { rooms, sessionStats, player, sessionCode, liveScore } = window.useGame();
   const B = window.Islands.BIOMES;
   const cleared = rooms.filter((r) => r.status === 'completed');
-  const totalStars = cleared.reduce((s, r) => s + r.score, 0);
-  const maxStars = rooms.length * 3;
 
   const score = sessionStats ? sessionStats.score : 0;
   const wrongAttempts = sessionStats ? sessionStats.wrongAttempts : 0;
@@ -16,7 +14,7 @@ function DashboardView() {
 
   const stats = [
     { k: 'Islands cleared', v: `${cleared.length}/${rooms.length}`, c: '#5FD08A' },
-    { k: 'Stars earned', v: `${totalStars}/${maxStars}`, c: '#FFCE3A' },
+    { k: 'Total score', v: String(liveScore), c: '#FFCE3A' },
     { k: 'Wrong attempts', v: String(wrongAttempts), c: '#FF6B5E' },
     { k: 'Hints used', v: String(hintsUsed), c: '#2BB6A8' },
   ];
@@ -36,8 +34,8 @@ function DashboardView() {
             <div className="dh-info">
               <div className="dh-name">{player ? player.name : 'Guest'}</div>
               <div className="dh-title">Kubernetes Responder</div>
-              <div className="xpbar"><span style={{ width: Math.min(100, score / 10) + '%' }} /></div>
-              <div className="xp-lab">Score: {score}</div>
+              <div className="xpbar"><span style={{ width: Math.min(100, liveScore / 10) + '%' }} /></div>
+              <div className="xp-lab">Score: {liveScore}</div>
             </div>
           </div>
 
