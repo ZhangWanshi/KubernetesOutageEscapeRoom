@@ -125,27 +125,53 @@ function RunbookBody() {
 }
 
 function RewardsBody() {
-  const { playSfx, claimReward } = window.useGame();
-  const [claimed, setClaimed] = React.useState({ login: false, hint: false });
+  const { playSfx, claimReward, player, rooms } = window.useGame();
+  const [claimed, setClaimed] = React.useState({ login: false, first: false });
   const claim = (k) => { playSfx('click'); setClaimed((c) => ({ ...c, [k]: true })); claimReward(); };
+
+  const cleared = rooms ? rooms.filter((r) => r.status === 'completed') : [];
+  const hasCleared = cleared.length > 0;
+  const allCleared = rooms && cleared.length === rooms.length && rooms.length > 0;
+  const joinBonus = (window.SCORE_CONFIG && window.SCORE_CONFIG.joinBonus) || 100;
+  const playerName = player && player.name;
+
   return (
     <div className="rw-claim">
       <div className={'rw-item' + (claimed.login ? ' done' : '')}>
         <span className="rw-ic" style={{ background: 'var(--gold)' }}>★</span>
-        <div><b>Daily login</b><span>Day 5 streak</span></div>
-        {claimed.login ? <span className="rw-done">Claimed ✓</span>
-          : <button className="btn-gold sm" onClick={() => claim('login')}>Claim +200 XP</button>}
+        <div>
+          <b>Session joined</b>
+          <span>{playerName ? `Welcome, ${playerName}` : 'Welcome aboard'}</span>
+        </div>
+        {claimed.login
+          ? <span className="rw-done">Claimed ✓</span>
+          : <button className="btn-gold sm" onClick={() => claim('login')}>Claim +{joinBonus} XP</button>}
       </div>
-      <div className={'rw-item' + (claimed.hint ? ' done' : '')}>
+      <div className={'rw-item' + (claimed.first ? ' done' : '')}>
         <span className="rw-ic" style={{ background: 'var(--teal)' }}>⬡</span>
-        <div><b>Hint token ×2</b><span>Reveal a clue free</span></div>
-        {claimed.hint ? <span className="rw-done">Claimed ✓</span>
-          : <button className="btn-gold sm" onClick={() => claim('hint')}>Claim</button>}
+        <div>
+          <b>First island cleared</b>
+          <span>{hasCleared
+            ? `${cleared.length} island${cleared.length > 1 ? 's' : ''} cleared`
+            : 'Clear an island to unlock'}</span>
+        </div>
+        {!hasCleared
+          ? <span className="rw-done" style={{ opacity: 0.45 }}>Locked</span>
+          : claimed.first
+            ? <span className="rw-done">Claimed ✓</span>
+            : <button className="btn-gold sm" onClick={() => claim('first')}>Claim</button>}
       </div>
-      <div className="rw-item done">
+      <div className={'rw-item' + (allCleared ? ' done' : '')}>
         <span className="rw-ic" style={{ background: '#5FD08A' }}>✓</span>
-        <div><b>First clear bonus</b><span>Already claimed</span></div>
-        <span className="rw-done">Claimed</span>
+        <div>
+          <b>Full run bonus</b>
+          <span>{allCleared
+            ? 'All islands cleared!'
+            : rooms ? `${cleared.length}/${rooms.length} islands cleared` : 'Complete all islands'}</span>
+        </div>
+        {allCleared
+          ? <span className="rw-done">Claimed</span>
+          : <span className="rw-done" style={{ opacity: 0.45 }}>Locked</span>}
       </div>
     </div>
   );
