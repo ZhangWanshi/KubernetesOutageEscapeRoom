@@ -1,13 +1,14 @@
 /* DashboardView.jsx — player profile, expedition progress & squad. Port of
    renderDashboard(), with stats derived live from the rooms state. */
 function DashboardView() {
-  const { rooms, sessionStats, player, sessionCode, liveScore } = window.useGame();
+  const { rooms, sessionStats, player, sessionCode, liveScore, roomAttempts } = window.useGame();
   const B = window.Islands.BIOMES;
   const cleared = rooms.filter((r) => r.status === 'completed');
 
-  const score = sessionStats ? sessionStats.score : 0;
-  const wrongAttempts = sessionStats ? sessionStats.wrongAttempts : 0;
-  const hintsUsed = sessionStats ? sessionStats.hintsUsed : 0;
+  const localWrong = Object.values(roomAttempts || {}).reduce((s, a) => s + (a.wrongAnswers || 0), 0);
+  const localHints = Object.values(roomAttempts || {}).reduce((s, a) => s + (a.hintsUsed || 0), 0);
+  const wrongAttempts = (sessionStats && sessionStats.wrongAttempts != null) ? sessionStats.wrongAttempts : localWrong;
+  const hintsUsed = (sessionStats && sessionStats.hintsUsed != null) ? sessionStats.hintsUsed : localHints;
   const squadPlayers = sessionStats && sessionStats.players && sessionStats.players.length > 0
     ? sessionStats.players.map((p) => p.name)
     : (player ? [player.name] : []);

@@ -150,6 +150,7 @@ function App() {
       roomScore: res.correct ? roomScore : 0,
       wrongAnswers: attempt.wrongAnswers + (res.correct ? 0 : 1),
       hintsUsed: attempt.hintsUsed,
+      xp: res.correct ? (SCORE_CONFIG.base[room.diff] || 100) : 0,
     };
 
     if (res.correct) completeRoom(room.id, res.stars);

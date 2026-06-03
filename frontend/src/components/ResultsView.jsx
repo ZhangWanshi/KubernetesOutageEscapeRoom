@@ -6,7 +6,8 @@ function ResultsView() {
   const B = window.Islands.BIOMES;
   const win = res.correct;
   const next = rooms.find((r) => r.status === 'available');
-  const perHead = Math.round(res.xp / room.chars.length);
+  const xpTotal = res.xp || 0;
+  const perHead = room.chars.length > 0 ? Math.round(xpTotal / room.chars.length) : xpTotal;
 
   return (
     <div className="view" id="view-results" style={window.biomeViewStyle(room.biome)}>
