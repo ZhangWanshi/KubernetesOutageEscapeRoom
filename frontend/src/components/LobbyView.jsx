@@ -215,7 +215,7 @@ function LobbyView() {
                 </div>
                 <div className="tc-reward">
                   <span>Team reward</span>
-                  <b><window.Star filled size={16} /><window.Star filled size={16} /><window.Star filled size={16} /> + {(window.SCORE_CONFIG.base || {})[target.diff] || 100} XP each</b>
+                  <b><window.Star filled size={16} /><window.Star filled size={16} /><window.Star filled size={16} /> + {(window.SCORE_CONFIG.completionXP || {})[target.diff] || 350} XP each</b>
                 </div>
               </div>
 

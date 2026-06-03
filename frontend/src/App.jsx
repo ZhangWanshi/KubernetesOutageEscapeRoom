@@ -14,10 +14,11 @@ const clone = (o) => JSON.parse(JSON.stringify(o));
 const sfx = (k) => { if (window.Sfx) window.Sfx.play(k); };
 
 const SCORE_CONFIG = {
-  base:        { Easy: 100, Medium: 150, Hard: 200 },
-  wrongPenalty:{ Easy: 10,  Medium: 20,  Hard: 30  },
-  hintPenalty: [10, 20, 30],
-  timeLimit:   { Easy: 600, Medium: 900, Hard: 1200 },
+  base:         { Easy: 100, Medium: 150, Hard: 200 },
+  completionXP: { Easy: 350, Medium: 500, Hard: 1000 },
+  wrongPenalty: { Easy: 10,  Medium: 20,  Hard: 30   },
+  hintPenalty:  [10, 20, 30],
+  timeLimit:    { Easy: 600, Medium: 900, Hard: 1200 },
 };
 window.SCORE_CONFIG = SCORE_CONFIG;
 
@@ -136,7 +137,7 @@ function App() {
     const roomScore = calcRoomScore(room.diff, attempt.wrongAnswers, attempt.hintsUsed);
 
     if (res.correct) {
-      setTotalScore(prev => prev + (SCORE_CONFIG.base[room.diff] || 100));
+      setTotalScore(prev => prev + (SCORE_CONFIG.completionXP[room.diff] || 350));
     } else {
       setTotalScore(prev => prev - (SCORE_CONFIG.wrongPenalty[room.diff] || 10));
       setRoomAttempts((prev) => {
@@ -150,7 +151,7 @@ function App() {
       roomScore: res.correct ? roomScore : 0,
       wrongAnswers: attempt.wrongAnswers + (res.correct ? 0 : 1),
       hintsUsed: attempt.hintsUsed,
-      xp: res.correct ? (SCORE_CONFIG.base[room.diff] || 100) : 0,
+      xp: res.correct ? (SCORE_CONFIG.completionXP[room.diff] || 350) : 0,
     };
 
     if (res.correct) completeRoom(room.id, res.stars);
