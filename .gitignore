@@ -37,6 +37,10 @@ build/
 *.log
 *.err
 
+# H2 database files
+*.mv.db
+*.trace.db
+
 # Frontend generated files
 frontend/node_modules/
 frontend/dist/

@@ -93,7 +93,7 @@ class Room1GameFlowTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.hintNumber").value(1))
                 .andExpect(jsonPath("$.hint").value("Compare the Order Service configuration with the Inventory API documentation. Look carefully at the endpoint path."))
-                .andExpect(jsonPath("$.score").value(95));
+                .andExpect(jsonPath("$.score").value(90));
     }
 
     @Test
@@ -104,17 +104,17 @@ class Room1GameFlowTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerName\":\"Madhuri\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.score").value(95));
+                .andExpect(jsonPath("$.score").value(90));
 
         mockMvc.perform(post("/api/sessions/{sessionCode}/rooms/1/hint", sessionCode)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerName\":\"Madhuri\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.score").value(95));
+                .andExpect(jsonPath("$.score").value(70));
 
         mockMvc.perform(get("/api/sessions/{sessionCode}/state", sessionCode))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.hintsUsed").value(1))
+                .andExpect(jsonPath("$.hintsUsed").value(2))
                 .andExpect(jsonPath("$.currentRoomHintUsed").value(true));
     }
 

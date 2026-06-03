@@ -10,7 +10,7 @@ public class DatabaseMigrationConfig {
 
     private void addColumnIfNotExists(JdbcTemplate jdbc, String table, String column, String definition) {
         Integer count = jdbc.queryForObject(
-            "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?",
+            "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE UPPER(TABLE_NAME) = UPPER(?) AND UPPER(COLUMN_NAME) = UPPER(?)",
             Integer.class, table, column
         );
         if (count == null || count == 0) {
