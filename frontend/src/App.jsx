@@ -254,6 +254,7 @@ function App() {
     completeRoom, openUtil, closeUtil, setSoundOn, claimReward,
     playSfx: sfx,
     roomAttempts, totalScore, liveScore, recordHintUsed,
+    updatePlayer: (patch) => setPlayer((prev) => prev ? { ...prev, ...patch } : prev),
   };
 
   // The join screen is its own full-bleed layout — render it without app chrome.

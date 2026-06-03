@@ -32,7 +32,7 @@ function DashboardView() {
             <div className="dh-av">{player ? player.marker : '?'}</div>
             <div className="dh-info">
               <div className="dh-name">{player ? player.name : 'Guest'}</div>
-              <div className="dh-title">Kubernetes Responder</div>
+              <div className="dh-title">{(player && player.role) || 'Kubernetes Responder'}</div>
               <div className="xpbar"><span style={{ width: Math.min(100, liveScore / 10) + '%' }} /></div>
               <div className="xp-lab">Score: {liveScore}</div>
             </div>

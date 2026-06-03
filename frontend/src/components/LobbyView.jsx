@@ -14,7 +14,7 @@ function makeLobby(target) {
 }
 
 function LobbyView() {
-  const { rooms, lobbyTarget, openRoom, sessionCode, player, navigate } = window.useGame();
+  const { rooms, lobbyTarget, openRoom, sessionCode, player, navigate, updatePlayer } = window.useGame();
   const ROLES = window.QuestData.ROLES;
   const target = lobbyTarget
     || rooms.find((r) => r.status === 'available')
@@ -32,17 +32,18 @@ function LobbyView() {
       window.Api.getState(sessionCode)
         .then((state) => {
           if (!state) return;
-          setL((prev) => ({
-            ...prev,
-            party: (state.players || []).map((p, i) => ({
+          setL((prev) => {
+            const party = (state.players || []).map((p, i) => ({
               c: p.name,
               role: ROLES[i % ROLES.length],
               ready: true,
               host: i === 0,
               you: player && p.name === player.name,
-            })),
-            waiting: (state.pendingPlayers || []).map((p) => ({ c: p.name, since: 'waiting' })),
-          }));
+            }));
+            const mine = player && party.find((m) => m.you);
+            if (mine) updatePlayer({ role: mine.role });
+            return { ...prev, party, waiting: (state.pendingPlayers || []).map((p) => ({ c: p.name, since: 'waiting' })) };
+          });
         })
         .catch(() => {});
     };
@@ -97,9 +98,16 @@ function LobbyView() {
     setCopied(true);
     setTimeout(() => setCopied(false), 1200);
   };
-  const cycleRole = (cid) => setL((p) => ({
-    ...p, party: p.party.map((m) => m.c === cid ? { ...m, role: ROLES[(ROLES.indexOf(m.role) + 1) % ROLES.length] } : m),
-  }));
+  const cycleRole = (cid) => {
+    setL((p) => {
+      const next = { ...p, party: p.party.map((m) => m.c === cid ? { ...m, role: ROLES[(ROLES.indexOf(m.role) + 1) % ROLES.length] } : m) };
+      if (player && cid === player.name) {
+        const mine = next.party.find((m) => m.c === player.name);
+        if (mine) updatePlayer({ role: mine.role });
+      }
+      return next;
+    });
+  };
   const invite = (cid) => {
     if (!sessionCode) return;
     window.Api.approvePlayer(sessionCode, cid)
