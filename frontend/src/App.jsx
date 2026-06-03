@@ -14,6 +14,7 @@ const clone = (o) => JSON.parse(JSON.stringify(o));
 const sfx = (k) => { if (window.Sfx) window.Sfx.play(k); };
 
 const SCORE_CONFIG = {
+  joinBonus:    100,
   base:         { Easy: 100, Medium: 150, Hard: 200 },
   completionXP: { Easy: 350, Medium: 500, Hard: 1000 },
   wrongPenalty: { Easy: 10,  Medium: 20,  Hard: 30   },
@@ -193,6 +194,7 @@ function App() {
     if (profile.code) setSessionCode(profile.code);
     registerAvpal(profile.name, profile.color);
     try { localStorage.setItem('k8sq.player', JSON.stringify(profile)); } catch (e) {}
+    setTotalScore(SCORE_CONFIG.joinBonus);
     sfx('enter');
     if (profile.currentRoomId) {
       // Late joiner: game already running — sync room states and enter the current room directly
