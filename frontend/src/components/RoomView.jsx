@@ -69,22 +69,37 @@ function RoomView() {
   const c = levels[currentLevel];
   const meta = CHALLENGE_META[challengeType] || CHALLENGE_META['cause-fix'];
 
-  // ── Countdown timer (display only, no score effect) ──────────────────────
+  // ── Countdown timer ──────────────────────────────────────────────────────
   const scoreCfg = window.SCORE_CONFIG || {};
-  const timeLimit = (scoreCfg.timeLimit || {})[room.diff] || 600;
+  const timeLimit = (scoreCfg.timeLimit || {})[room.diff] || 360;
   const attemptData = roomAttempts && roomAttempts[room.id];
   const [timeRemaining, setTimeRemaining] = React.useState(() => {
     if (!attemptData || !attemptData.startTime) return timeLimit;
     return Math.max(0, timeLimit - Math.floor((Date.now() - attemptData.startTime) / 1000));
   });
+  const timedOutRef = React.useRef(false);
   React.useEffect(() => {
     const startTime = attemptData && attemptData.startTime;
     if (!startTime) return;
+    timedOutRef.current = false;
     const id = setInterval(() => {
       setTimeRemaining(Math.max(0, timeLimit - Math.floor((Date.now() - startTime) / 1000)));
     }, 1000);
     return () => clearInterval(id);
   }, [attemptData && attemptData.startTime, timeLimit]);
+  React.useEffect(() => {
+    if (timeRemaining === 0 && !timedOutRef.current) {
+      timedOutRef.current = true;
+      openResults(room, {
+        correct: false, stars: 1, xp: 0,
+        hintUsed: anyHintUsed || hintUsed,
+        causeCorrect: false, fixCorrect: false,
+        causeText: '', fixText: '',
+        levelsCompleted: currentLevel + 1, totalLevels,
+        timedOut: true,
+      });
+    }
+  }, [timeRemaining]);
   const fmtTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
   React.useEffect(() => {

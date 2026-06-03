@@ -19,7 +19,7 @@ const SCORE_CONFIG = {
   completionXP: { Easy: 350, Medium: 500, Hard: 1000 },
   wrongPenalty: { Easy: 10,  Medium: 20,  Hard: 30   },
   hintPenalty:  [10, 20, 30],
-  timeLimit:    { Easy: 600, Medium: 900, Hard: 1200 },
+  timeLimit:    { Easy: 360, Medium: 480, Hard: 600 },
 };
 window.SCORE_CONFIG = SCORE_CONFIG;
 
@@ -129,8 +129,8 @@ function App() {
     setView('room');
     if (window.Ambience) window.Ambience.forRoom(room.id);
     setRoomAttempts((prev) => {
-      if (prev[room.id]) return prev;
-      return { ...prev, [room.id]: { wrongAnswers: 0, hintsUsed: 0, startTime: Date.now() } };
+      const curr = prev[room.id] || { wrongAnswers: 0, hintsUsed: 0 };
+      return { ...prev, [room.id]: { ...curr, startTime: Date.now() } };
     });
   };
   const openResults = (room, res) => {
