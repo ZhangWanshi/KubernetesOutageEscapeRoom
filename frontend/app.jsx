@@ -1,5 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import GameMap from "./GameMap.jsx";
+import "./GameMap.css";
 
 const API_BASE_URL = "/api";
 const TOTAL_ROOMS = 3;
@@ -120,15 +122,18 @@ function App() {
   const [pendingAction, setPendingAction] = React.useState(null);
   const [feedback, setFeedback] = React.useState(null);
   const [hintModal, setHintModal] = React.useState(null);
+  const [completionSummary, setCompletionSummary] = React.useState(null);
   const [briefingNotice, setBriefingNotice] = React.useState("");
   const [error, setError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [report, setReport] = React.useState(null);
   const [soundEnabled, setSoundEnabled] = React.useState(localStorage.getItem("escape.soundEnabled") === "true");
+  const [mapPopupRoomId, setMapPopupRoomId] = React.useState(null);
   const ambienceRef = React.useRef(null);
+  const resumeAttemptedRef = React.useRef(false);
 
   React.useEffect(() => {
-    document.body.classList.remove("screen-join", "screen-briefing", "screen-room", "screen-final");
+    document.body.classList.remove("screen-join", "screen-briefing", "screen-map", "screen-room", "screen-final");
     document.body.classList.add(`screen-${screen}`);
   }, [screen]);
 
@@ -150,7 +155,7 @@ function App() {
   }, [sessionCode, playerName, screen, feedback, activeRoomId]);
 
   React.useEffect(() => {
-    if (!sessionCode || !playerName || screen !== "briefing") return undefined;
+    if (!sessionCode || !playerName || !["briefing", "map"].includes(screen)) return undefined;
     const handle = window.setInterval(() => refreshBriefingState(sessionCode).catch(() => {}), 2500);
     return () => window.clearInterval(handle);
   }, [sessionCode, playerName, screen]);
@@ -218,11 +223,28 @@ function App() {
     }
   }, [screen, soundEnabled]);
 
+  React.useEffect(() => {
+    if (resumeAttemptedRef.current) return;
+    resumeAttemptedRef.current = true;
+
+    const savedCode = localStorage.getItem("escape.sessionCode");
+    const savedPlayerName = localStorage.getItem("escape.playerName");
+    if (!savedCode || !savedPlayerName) return;
+
+    resumeSavedSession(savedCode, savedPlayerName).catch(() => {
+      clearSavedSession();
+      setError("Saved session was not available. Create or join a session to start fresh.");
+    });
+  }, []);
+
   function toggleSound() {
     getGameAudioContext();
-    if (!soundEnabled) {
-      setSoundEnabled(true);
-      localStorage.setItem("escape.soundEnabled", "true");
+    const nextSoundEnabled = !soundEnabled;
+    setSoundEnabled(nextSoundEnabled);
+    localStorage.setItem("escape.soundEnabled", String(nextSoundEnabled));
+    if (!nextSoundEnabled) {
+      ambienceRef.current?.pause();
+      return;
     }
     playGameSound("correct", 0.22);
   }
@@ -281,9 +303,46 @@ function App() {
     await refreshGame(code);
   }
 
+  async function resumeSavedSession(code, name) {
+    const normalizedCode = code.trim().toUpperCase();
+    setError("");
+    setSessionCode(normalizedCode);
+    setSessionInput(normalizedCode);
+    setPlayerName(name);
+
+    const nextState = await apiRequest(`/sessions/${encodeURIComponent(normalizedCode)}/state`);
+    setSessionState(nextState);
+
+    if (!nextState.players.some((player) => player.name.toLowerCase() === name.trim().toLowerCase())) {
+      await joinSession(normalizedCode, name, "briefing");
+      return;
+    }
+
+    if (nextState.completed) {
+      await loadReport(normalizedCode);
+      return;
+    }
+
+    const nextRoom1State = await apiRequest(`/sessions/${encodeURIComponent(normalizedCode)}/rooms/1/state`);
+    setRoom1State(nextRoom1State);
+    if (nextRoom1State.completed) {
+      const nextRoom2State = await refreshRoom2State(normalizedCode);
+      if (nextRoom2State?.completed) {
+        await refreshRoom3State(normalizedCode);
+      }
+    } else {
+      setRoom2State(null);
+      setRoom3State(null);
+    }
+    await refreshActivity(normalizedCode);
+    setBriefingNotice("Session restored. Continue from the current mission state or start a new session.");
+    setScreen("briefing");
+  }
+
   async function startGame() {
-    const targetRoomId = room2State?.completed && !room3State?.completed ? 3 : room1State?.completed && !room2State?.completed ? 2 : 1;
-    await openRoom(targetRoomId);
+    setBriefingNotice("");
+    setMapPopupRoomId(null);
+    setScreen("map");
   }
 
   async function openRoom(roomId) {
@@ -292,6 +351,7 @@ function App() {
     }
     setBriefingNotice("");
     setFeedback(null);
+    setMapPopupRoomId(null);
     setActiveRoomId(roomId);
     setScreen("room");
     await refreshGame(sessionCode, { keepBriefing: true, roomId });
@@ -472,7 +532,20 @@ function App() {
       setBriefingNotice(result.roomCompleted
         ? "Room 1 completed. Review the mission status before continuing."
         : `Level ${result.levelNumber} completed. Level ${result.currentLevel} is now unlocked.`);
-      setScreen("briefing");
+      setMapPopupRoomId(result.roomCompleted ? null : 1);
+      setScreen("map");
+      if (result.roomCompleted) {
+        setCompletionSummary(createCompletionSummary({
+          roomId: 1,
+          roomName: "Microservice Incident Response",
+          levelNumber: result.levelNumber,
+          roomCompleted: true,
+          gameCompleted: false,
+          score: result.score,
+          serviceHealth: result.serviceHealth,
+          message: result.message,
+        }));
+      }
     }
     setFeedback({
       correct: result.correct,
@@ -500,7 +573,20 @@ function App() {
       setBriefingNotice(result.roomCompleted
         ? "Room 2 completed. Room 3 Level 1 is now unlocked."
         : `Room 2 Level ${result.currentLevel} is now unlocked.`);
-      setScreen("briefing");
+      setMapPopupRoomId(result.roomCompleted ? null : 2);
+      setScreen("map");
+      if (result.roomCompleted) {
+        setCompletionSummary(createCompletionSummary({
+          roomId: 2,
+          roomName: "Container Recovery Operations",
+          levelNumber: result.levelNumber,
+          roomCompleted: true,
+          gameCompleted: false,
+          score: result.score,
+          serviceHealth: result.serviceHealth,
+          message: result.message,
+        }));
+      }
     }
     setFeedback({
       correct: result.correct,
@@ -527,10 +613,20 @@ function App() {
       body: { playerName, ...answer },
     });
     if (result.correct && result.gameCompleted) {
-      await loadReport(sessionCode);
+      setCompletionSummary(createCompletionSummary({
+        roomId: 3,
+        roomName: "Kubernetes Service Routing Fix",
+        levelNumber: result.levelNumber,
+        roomCompleted: result.roomCompleted,
+        gameCompleted: true,
+        score: result.score,
+        serviceHealth: result.serviceHealth,
+        message: result.message,
+      }));
     } else if (result.correct) {
       setBriefingNotice(`Room 3 Level ${result.currentLevel} is now unlocked.`);
-      setScreen("briefing");
+      setMapPopupRoomId(3);
+      setScreen("map");
     }
     setFeedback({
       correct: result.correct,
@@ -553,6 +649,35 @@ function App() {
     return result;
   }
 
+  function createCompletionSummary({ roomId, roomName, levelNumber, roomCompleted, gameCompleted, score, serviceHealth, message }) {
+    return {
+      roomId,
+      roomName,
+      levelNumber,
+      roomCompleted,
+      gameCompleted,
+      score,
+      serviceHealth,
+      message,
+      hintsUsed: sessionState?.hintsUsed || 0,
+      wrongAttempts: sessionState?.wrongAttempts || 0,
+      buttonText: gameCompleted ? "View Final Report" : roomCompleted ? "Next Room" : "Next Level",
+    };
+  }
+
+  async function continueAfterCompletion() {
+    const summary = completionSummary;
+    setCompletionSummary(null);
+    if (summary?.gameCompleted) {
+      await loadReport(sessionCode);
+      return;
+    }
+    if (summary?.roomCompleted) {
+      setScreen("map");
+      setMapPopupRoomId(summary.roomId);
+    }
+  }
+
   async function goNext() {
     await refreshGame(sessionCode);
   }
@@ -565,10 +690,9 @@ function App() {
     setScreen("final");
   }
 
-  function resetGame() {
+  function clearSavedSession() {
     localStorage.removeItem("escape.sessionCode");
     localStorage.removeItem("escape.playerName");
-    setScreen("join");
     setSessionCode("");
     setSessionInput("");
     setSessionState(null);
@@ -584,6 +708,11 @@ function App() {
     setError("");
   }
 
+  function resetGame() {
+    clearSavedSession();
+    setScreen("join");
+  }
+
   const canCreate = playerName.trim().length > 0;
   const canJoin = playerName.trim().length > 0 && sessionInput.trim().length > 0;
 
@@ -595,8 +724,13 @@ function App() {
         onClick={toggleSound}
         aria-label={soundEnabled ? "Turn game sound off" : "Turn game sound on"}
       >
-        {soundEnabled ? "Test Sound" : "Enable Sound"}
+        {soundEnabled ? "Sound On" : "Sound Off"}
       </button>
+      {screen !== "join" && (
+        <button type="button" className="session-reset-button" onClick={resetGame}>
+          Leave Session
+        </button>
+      )}
 
       {screen === "join" && (
         <header className="top-bar">
@@ -616,9 +750,11 @@ function App() {
           setSessionInput={setSessionInput}
           createSession={createSession}
           joinExistingSession={joinExistingSession}
+          resetGame={resetGame}
           error={error}
           canCreate={canCreate}
           canJoin={canJoin}
+          hasSavedSession={Boolean(sessionCode)}
         />
       )}
 
@@ -627,11 +763,27 @@ function App() {
           sessionCode={sessionCode}
           playerName={playerName}
           players={sessionState.players}
+          activity={activity}
           startGame={startGame}
           openRoom={openRoom}
           room1State={room1State}
           room2State={room2State}
           room3State={room3State}
+          notice={briefingNotice}
+        />
+      )}
+
+      {screen === "map" && sessionState && (
+        <GameMap
+          sessionCode={sessionCode}
+          playerName={playerName}
+          players={sessionState.players}
+          openRoom={openRoom}
+          room1State={room1State}
+          room2State={room2State}
+          room3State={room3State}
+          selectedRoomId={mapPopupRoomId}
+          setSelectedRoomId={setMapPopupRoomId}
           notice={briefingNotice}
         />
       )}
@@ -687,14 +839,18 @@ function App() {
       {hintModal && (
         <Modal title="Investigation hint" onClose={() => setHintModal(null)}>
           <p>{hintModal.hint}</p>
-          <p className="warning-text">Hint penalty applied once for this room.</p>
+          <p className="warning-text">Hint used: 5 marks reduced. Current score: {hintModal.score}.</p>
         </Modal>
+      )}
+
+      {completionSummary && (
+        <CompletionSummaryModal summary={completionSummary} onContinue={continueAfterCompletion} />
       )}
     </main>
   );
 }
 
-function JoinScreen({ playerName, setPlayerName, sessionInput, setSessionInput, createSession, joinExistingSession, error, canCreate, canJoin }) {
+function JoinScreen({ playerName, setPlayerName, sessionInput, setSessionInput, createSession, joinExistingSession, resetGame, error, canCreate, canJoin, hasSavedSession }) {
   return (
     <section className="lobby">
       <div className="panel intro-panel">
@@ -722,6 +878,7 @@ function JoinScreen({ playerName, setPlayerName, sessionInput, setSessionInput, 
             <input value={sessionInput} maxLength={6} placeholder="ABC123" onChange={(event) => setSessionInput(event.target.value.toUpperCase())} />
           </label>
           <button type="button" disabled={!canJoin} onClick={joinExistingSession}>Join Session</button>
+          {hasSavedSession && <button type="button" onClick={resetGame}>Clear Saved Session</button>}
         </div>
         {error && <p className="error-text" role="alert">{error}</p>}
       </div>
@@ -729,7 +886,7 @@ function JoinScreen({ playerName, setPlayerName, sessionInput, setSessionInput, 
   );
 }
 
-function MissionBriefing({ sessionCode, playerName, players = [], startGame, openRoom, room1State, room2State, room3State, notice }) {
+function MissionBriefing({ sessionCode, playerName, players = [], activity = [], startGame, openRoom, room1State, room2State, room3State, notice }) {
   const rules = [
     "Each room has 3 levels.",
     "Complete levels in order.",
@@ -755,6 +912,7 @@ function MissionBriefing({ sessionCode, playerName, players = [], startGame, ope
       id: 1,
       label: room1Completed ? "Room 1: Completed" : "Room 1: Available",
       title: "Microservice Incident Response",
+      description: "Restore customer-api health, ownership, and database configuration.",
       levels: ["Service Health Check", "Service Responsibility Mapping", "Configuration Recovery"],
       locked: false,
       completed: room1Completed,
@@ -764,6 +922,7 @@ function MissionBriefing({ sessionCode, playerName, players = [], startGame, ope
       id: 2,
       label: !room2Unlocked ? "Room 2: Locked" : room2Completed ? "Room 2: Completed" : "Room 2: Available",
       title: "Container Recovery Operations",
+      description: "Identify the failed container state, rebuild startup order, and roll back safely.",
       levels: ["Container Status Inspection", "Container Lifecycle Sequence", "Safe Container Recovery"],
       locked: !room2Unlocked,
       completed: room2Completed,
@@ -773,6 +932,7 @@ function MissionBriefing({ sessionCode, playerName, players = [], startGame, ope
       id: 3,
       label: !room3Unlocked ? "Room 3: Locked" : room3Completed ? "Room 3: Completed" : "Room 3: Available",
       title: "Kubernetes Service Routing Fix",
+      description: "Inspect endpoints, follow routing evidence, and repair the selector mismatch.",
       levels: ["Endpoint Inspection", "Investigation Sequence", "Selector Fix Command"],
       locked: !room3Unlocked,
       completed: room3Completed,
@@ -790,6 +950,21 @@ function MissionBriefing({ sessionCode, playerName, players = [], startGame, ope
       : room1Completed
       ? "Room 1 complete"
       : `Room 1 Level ${currentRoom1Level}`;
+  const activeRoomData = rooms.find((room) => room.id === activeRoom) || rooms[0];
+  const roomBriefings = [
+    {
+      title: "Room 1: Microservice Incident Response",
+      text: "Check customer-api health, map service responsibilities, and restore the missing DB_HOST configuration.",
+    },
+    {
+      title: "Room 2: Container Recovery Operations",
+      text: "Inspect a failing order-service container, arrange the startup lifecycle, and choose a safe rollback action.",
+    },
+    {
+      title: "Room 3: Kubernetes Service Routing Fix",
+      text: "Inspect service endpoints, follow a routing investigation sequence, and fix the selector mismatch.",
+    },
+  ];
 
   return (
     <section className="briefing-screen">
@@ -824,67 +999,32 @@ function MissionBriefing({ sessionCode, playerName, players = [], startGame, ope
           </div>
         </div>
 
-        <section className="level-map-page" aria-label="Escape room level map">
-          <img className="level-map-image" src="/assets/levels.png" alt="Escape route map through forest, desert, and snow mountain rooms" />
-          <div className="level-map-overlay">
-            {rooms.map((room) => (
-              <article
-                key={room.id}
-                className={`world-room-card world-room-${room.id} ${room.locked ? "locked" : "available"} ${room.completed ? "completed" : ""} ${activeRoom === room.id && !room.completed ? "current-room" : ""}`}
-              >
-                <p className="map-status">{room.locked ? "Locked" : room.completed ? "Completed" : "Current Mission"}</p>
-                <h3>Room {room.id}</h3>
-                <strong>{room.title}</strong>
-                <div className="world-level-list">
-                  {room.levels.map((level, levelIndex) => {
-                    const levelNumber = levelIndex + 1;
-                    const done = room.completed || levelNumber < room.currentLevel;
-                    const active = !room.locked && !room.completed && activeRoom === room.id && levelNumber === room.currentLevel;
-                    return active ? (
-                      <button type="button" key={level} className="world-level-button active" onClick={() => openRoom(room.id)}>
-                        <span>Level {levelNumber}</span>
-                        <small>{level}</small>
-                      </button>
-                    ) : (
-                      <div key={level} className={`world-level-button ${done ? "done" : "locked"}`}>
-                        <span>Level {levelNumber}</span>
-                        <small>{level}</small>
-                      </div>
-                    );
-                  })}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <div className="map-support-grid">
-          <section className="briefing-section room1-detail">
-            <h3>{room3Unlocked && !room3Completed ? "Room 3: Kubernetes Service Routing Fix" : room2Unlocked && !room2Completed ? "Room 2: Container Recovery Operations" : "Room 1: Microservice Incident Response"}</h3>
-            {notice && <p className="briefing-notice">{notice}</p>}
-            {room3Unlocked && !room3Completed ? (
-              <>
-                <p><strong>Objective:</strong> Inspect checkout-service endpoints, follow a service routing investigation path, and patch the selector to app=checkout.</p>
-                <p><strong>Levels:</strong> Endpoint Command, Debugging Sequence, Selector Fix Command.</p>
-              </>
-            ) : room2Unlocked && !room2Completed ? (
-              <>
-                <p><strong>Objective:</strong> Recover the order-service container by identifying its failed status, rebuilding the startup sequence, and selecting the safest rollback action.</p>
-                <p><strong>Levels:</strong> Status Inspection, Lifecycle Sequence, Safe Recovery.</p>
-              </>
-            ) : (
-              <>
-                <p><strong>Objective:</strong> Restore the customer-api flow by checking health, mapping responsibilities, and fixing DB_HOST.</p>
-                <p><strong>Levels:</strong> Health Check, Responsibility Mapping, Configuration Recovery.</p>
-              </>
-            )}
+        <div className="mission-lobby-grid">
+          <section className="briefing-section mission-rules-card">
+            <div className="section-kicker">Game Rules</div>
+            <h3>How to Escape</h3>
+            <div className="mission-rule-list">
+              {rules.map((rule, index) => (
+                <span key={rule}><strong>{index + 1}</strong>{rule}</span>
+              ))}
+            </div>
           </section>
 
-          <section className="briefing-section compact-rules">
-            <h3>Rules</h3>
-            <div className="compact-rule-list">
-              {rules.slice(0, 4).map((rule) => <span key={rule}>{rule}</span>)}
+          <section className="briefing-section room1-detail active-mission-card mission-briefing-card">
+            <div className="section-kicker">Mission Briefing</div>
+            <h3>Incident Room Overview</h3>
+            {notice && <p className="briefing-notice">{notice}</p>}
+            <div className="room-briefing-list">
+              {roomBriefings.map((briefing, index) => (
+                <article key={briefing.title} className={activeRoom === index + 1 ? "active" : ""}>
+                  <strong>{briefing.title}</strong>
+                  <p>{briefing.text}</p>
+                </article>
+              ))}
             </div>
+            <button type="button" className="mission-cta map-cta" onClick={startGame}>
+              Start Game Map
+            </button>
           </section>
         </div>
 
@@ -958,6 +1098,97 @@ function MissionBriefing({ sessionCode, playerName, players = [], startGame, ope
           </div>
         </div>
       </div>
+    </section>
+  );
+}
+
+function LegacyGameMap({ sessionCode, playerName, players = [], openRoom, room1State, room2State, room3State }) {
+  const room1Completed = Boolean(room1State?.completed);
+  const room2Unlocked = room1Completed;
+  const room2Completed = Boolean(room2State?.completed);
+  const room3Unlocked = room2Completed;
+  const room3Completed = Boolean(room3State?.completed);
+  const activeRoom = room3Unlocked && !room3Completed ? 3 : room2Unlocked && !room2Completed ? 2 : 1;
+  const rooms = [
+    {
+      id: 1,
+      title: "Microservice Incident Response",
+      levels: ["Health Check", "Responsibility Mapping", "Configuration Recovery"],
+      locked: false,
+      completed: room1Completed,
+      currentLevel: room1State?.currentLevel || 1,
+    },
+    {
+      id: 2,
+      title: "Container Recovery Operations",
+      levels: ["Status Inspection", "Lifecycle Sequence", "Safe Recovery"],
+      locked: !room2Unlocked,
+      completed: room2Completed,
+      currentLevel: room2State?.currentLevel || 1,
+    },
+    {
+      id: 3,
+      title: "Kubernetes Service Routing Fix",
+      levels: ["Endpoint Inspection", "Investigation Sequence", "Selector Fix"],
+      locked: !room3Unlocked,
+      completed: room3Completed,
+      currentLevel: room3State?.currentLevel || 1,
+    },
+  ];
+
+  return (
+    <section className="game-map-screen">
+      <header className="map-game-hud">
+        <div>
+          <p className="eyebrow">Game Map</p>
+          <h1>Kubernetes Outage Escape Room</h1>
+        </div>
+        <div className="map-hud-chips">
+          <span>Session <strong>{sessionCode}</strong></span>
+          <span>{playerName}</span>
+          <span>{players.length} online</span>
+        </div>
+      </header>
+
+      <section className="level-map-page island-map-page game-only-map" aria-label="Escape room island map">
+        <img className="level-map-image" src="/assets/teammate-island-map.png" alt="Island-style escape room map with selectable incident rooms" />
+        <div className="level-map-overlay">
+          {rooms.map((room) => (
+            <article
+              key={room.id}
+              className={`world-room-card map-level-strip world-room-${room.id} ${room.locked ? "locked" : "available"} ${room.completed ? "completed" : ""} ${activeRoom === room.id && !room.completed ? "current-room" : ""}`}
+            >
+              <p className="map-status">{room.locked ? "Locked" : room.completed ? "Completed" : "Current"}</p>
+              <h3>Room {room.id}</h3>
+              <strong>{room.title}</strong>
+              <div className="world-level-list">
+                {room.levels.map((level, levelIndex) => {
+                  const levelNumber = levelIndex + 1;
+                  const done = room.completed || levelNumber < room.currentLevel;
+                  const active = !room.locked && !room.completed && activeRoom === room.id && levelNumber === room.currentLevel;
+                  return active ? (
+                    <button type="button" key={level} className="world-level-button active" onClick={() => openRoom(room.id)}>
+                      <span className="level-3d-cap" aria-hidden="true" />
+                      <span className="level-3d-content">
+                        <span>Level {levelNumber}</span>
+                        <small>{level}</small>
+                      </span>
+                    </button>
+                  ) : (
+                    <div key={level} className={`world-level-button ${done ? "done" : "locked"}`}>
+                      <span className="level-3d-cap" aria-hidden="true" />
+                      <span className="level-3d-content">
+                        <span>Level {levelNumber}</span>
+                        <small>{level}</small>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
     </section>
   );
 }
@@ -1182,7 +1413,7 @@ function Room1Puzzle({ room1State, feedback, submitRoom1Level }) {
               </div>
             )}
             {level.levelNumber === 3 && (
-              <div className="puzzle-grid">
+              <div className="puzzle-grid room1-config-grid">
                 <pre className="yaml-card">{selectedDbHost ? "service: customer-api\nenv:\n  DB_HOST: " + selectedDbHost : level.snippet}</pre>
                 <div className="option-grid">
                   {level.options.map((option) => (
@@ -1623,6 +1854,34 @@ function RootCausePanel({ feedback, room }) {
         </>
       )}
     </section>
+  );
+}
+
+function CompletionSummaryModal({ summary, onContinue }) {
+  return (
+    <Modal title={summary.gameCompleted ? "Escape Complete" : summary.roomCompleted ? "Room Completed" : "Level Completed"} onClose={onContinue}>
+      <section className="completion-summary">
+        <p className="eyebrow">Room {summary.roomId}</p>
+        <h2>{summary.roomName}</h2>
+        <p className="completion-message">
+          {summary.gameCompleted
+            ? "All outage rooms are resolved."
+            : summary.roomCompleted
+            ? `Room ${summary.roomId} completed.`
+            : `Level ${summary.levelNumber} completed.`}
+        </p>
+        <p>{summary.message}</p>
+        <div className="report-grid completion-grid">
+          <ReportMetric label="Score" value={summary.score} />
+          <ReportMetric label="Service health" value={`${summary.serviceHealth}%`} />
+          <ReportMetric label="Hints used" value={summary.hintsUsed} />
+          <ReportMetric label="Wrong attempts" value={summary.wrongAttempts} />
+        </div>
+        <button type="button" className="primary-button completion-next-button" onClick={onContinue}>
+          {summary.buttonText}
+        </button>
+      </section>
+    </Modal>
   );
 }
 

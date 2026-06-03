@@ -138,7 +138,7 @@ public class GameSessionService {
     public Room1StateResponse getRoom1State(String sessionCode) {
         GameSession session = getSession(sessionCode);
         synchronized (session) {
-            requireRoom1Accessible(session);
+            requireRoom1Viewable(session);
             return toRoom1StateResponse(session);
         }
     }
@@ -146,7 +146,7 @@ public class GameSessionService {
     public Room2StateResponse getRoom2State(String sessionCode) {
         GameSession session = getSession(sessionCode);
         synchronized (session) {
-            requireRoom2Accessible(session);
+            requireRoom2Viewable(session);
             return toRoom2StateResponse(session);
         }
     }
@@ -154,7 +154,7 @@ public class GameSessionService {
     public Room3StateResponse getRoom3State(String sessionCode) {
         GameSession session = getSession(sessionCode);
         synchronized (session) {
-            requireRoom3Accessible(session);
+            requireRoom3Viewable(session);
             return toRoom3StateResponse(session);
         }
     }
@@ -195,7 +195,10 @@ public class GameSessionService {
             boolean completed = levelNumber == ROOM_1_TOTAL_LEVELS;
             if (completed) {
                 session.setRoom1Completed(true);
+                session.setCurrentRoomId(ROOM_2_ID);
+                session.setCurrentRoomHintsUsed(0);
                 activityService.add(session, request.playerName().trim() + " completed Room 1");
+                activityService.add(session, "Unlocked room " + ROOM_2_ID);
             } else {
                 session.setRoom1CurrentLevel(levelNumber + 1);
                 activityService.add(session, request.playerName().trim() + " completed Room 1 Level " + levelNumber);
@@ -249,7 +252,10 @@ public class GameSessionService {
             boolean completed = levelNumber == ROOM_2_TOTAL_LEVELS;
             if (completed) {
                 session.setRoom2Completed(true);
+                session.setCurrentRoomId(ROOM_3_ID);
+                session.setCurrentRoomHintsUsed(0);
                 activityService.add(session, request.playerName().trim() + " completed Room 2");
+                activityService.add(session, "Unlocked room " + ROOM_3_ID);
             } else {
                 session.setRoom2CurrentLevel(levelNumber + 1);
                 activityService.add(session, request.playerName().trim() + " completed Room 2 Level " + levelNumber);
@@ -395,13 +401,16 @@ public class GameSessionService {
                 return new HintResponse(0, "No more hints available.", session.getScore(), session.getServiceHealth());
             }
 
-            if (session.getCurrentRoomHintsUsed() == 0) {
-                scoringService.applyHint(session);
-                session.setCurrentRoomHintsUsed(1);
-                activityService.add(session, playerName.trim() + " requested a hint in " + room.getName());
+            int nextHintNumber = session.getCurrentRoomHintsUsed() + 1;
+            if (nextHintNumber > room.getHints().size()) {
+                return new HintResponse(0, "No more hints available.", session.getScore(), session.getServiceHealth());
             }
+
+            scoringService.applyHint(session);
+            session.setCurrentRoomHintsUsed(nextHintNumber);
+            activityService.add(session, playerName.trim() + " requested hint " + nextHintNumber + " in " + room.getName());
             sessionRepository.save(session);
-            return new HintResponse(1, room.getHints().get(0), session.getScore(), session.getServiceHealth());
+            return new HintResponse(nextHintNumber, room.getHints().get(nextHintNumber - 1), session.getScore(), session.getServiceHealth());
         }
     }
 
@@ -485,11 +494,26 @@ public class GameSessionService {
         }
     }
 
+    private void requireRoom1Viewable(GameSession session) {
+        if (session.getCurrentRoomId() != ROOM_1_ID && !session.isRoom1Completed()) {
+            throw new BadRequestException("Room 1 is not active for this session");
+        }
+    }
+
     private void requireRoom2Accessible(GameSession session) {
         if (!session.isRoom1Completed()) {
             throw new BadRequestException("Room 2 is locked until Room 1 is completed");
         }
-        if (session.getCurrentRoomId() > ROOM_2_ID || session.isCompleted()) {
+        if (session.getCurrentRoomId() != ROOM_2_ID || session.isCompleted()) {
+            throw new BadRequestException("Room 2 is not active for this session");
+        }
+    }
+
+    private void requireRoom2Viewable(GameSession session) {
+        if (!session.isRoom1Completed()) {
+            throw new BadRequestException("Room 2 is locked until Room 1 is completed");
+        }
+        if (session.getCurrentRoomId() != ROOM_2_ID && !session.isRoom2Completed()) {
             throw new BadRequestException("Room 2 is not active for this session");
         }
     }
@@ -498,8 +522,17 @@ public class GameSessionService {
         if (!session.isRoom1Completed() || !session.isRoom2Completed()) {
             throw new BadRequestException("Room 3 is locked until Room 2 is completed");
         }
-        if (session.isCompleted()) {
-            throw new BadRequestException("Session is already completed");
+        if (session.getCurrentRoomId() != ROOM_3_ID || session.isCompleted()) {
+            throw new BadRequestException("Room 3 is not active for this session");
+        }
+    }
+
+    private void requireRoom3Viewable(GameSession session) {
+        if (!session.isRoom1Completed() || !session.isRoom2Completed()) {
+            throw new BadRequestException("Room 3 is locked until Room 2 is completed");
+        }
+        if (session.getCurrentRoomId() != ROOM_3_ID && !session.isRoom3Completed()) {
+            throw new BadRequestException("Room 3 is not active for this session");
         }
     }
 

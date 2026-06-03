@@ -97,7 +97,7 @@ class Room1GameFlowTests {
     }
 
     @Test
-    void hintPenaltyAppliesOnlyOncePerRoom() throws Exception {
+    void hintPenaltyAppliesToEachHintInRoom() throws Exception {
         String sessionCode = createJoinedSession();
 
         mockMvc.perform(post("/api/sessions/{sessionCode}/rooms/1/hint", sessionCode)
@@ -110,11 +110,12 @@ class Room1GameFlowTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"playerName\":\"Madhuri\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.score").value(95));
+                .andExpect(jsonPath("$.hintNumber").value(2))
+                .andExpect(jsonPath("$.score").value(90));
 
         mockMvc.perform(get("/api/sessions/{sessionCode}/state", sessionCode))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.hintsUsed").value(1))
+                .andExpect(jsonPath("$.hintsUsed").value(2))
                 .andExpect(jsonPath("$.currentRoomHintUsed").value(true));
     }
 

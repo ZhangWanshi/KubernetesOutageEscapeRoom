@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: outage-escape-room
+data:
+  SERVER_PORT: "8081"
+  SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/escape_room_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+  SPRING_DATASOURCE_USERNAME: escape_user
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+  SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect

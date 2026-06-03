@@ -57,7 +57,9 @@
   ],
   "correctActionId": "A",
   "hints": [
-    "Compare the Service selector with the Deployment pod labels."
+    "Compare the Service selector with the Deployment pod labels.",
+    "The pods are healthy when called directly, so the failure is in Service routing rather than application startup.",
+    "The Service selector uses `app=api`, but the pods are labelled `app=game-api`."
   ],
   "rootCause": "The Service selected app=api, but the Deployment pods were labelled app=game-api, so Kubernetes created no endpoints.",
   "learningPoint": "Kubernetes Services route to pods through label selectors. A small label mismatch can make healthy pods unreachable."

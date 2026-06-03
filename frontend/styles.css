@@ -921,8 +921,8 @@ body.screen-briefing .app-shell {
 
 .game-layout {
   display: grid;
-  grid-template-columns: minmax(260px, 310px) minmax(0, 1fr);
-  gap: 0.85rem;
+  grid-template-columns: minmax(340px, 390px) minmax(0, 1fr);
+  gap: 1rem;
 }
 
 .status-panel,
@@ -1189,9 +1189,9 @@ body.screen-briefing .app-shell {
 .room-level-node {
   display: grid;
   gap: 0.18rem;
-  min-height: 5.2rem;
+  min-height: 4.65rem;
   border-color: rgba(255, 255, 255, 0.16);
-  padding: 0.75rem;
+  padding: 0.62rem 0.75rem;
   text-align: center;
   background: rgba(0, 0, 0, 0.34);
 }
@@ -1227,12 +1227,36 @@ body.screen-briefing .app-shell {
 }
 
 .room-level-node.done {
-  border-color: rgba(50, 213, 131, 0.7);
-  background: rgba(50, 213, 131, 0.14);
+  border-color: #f3c64d;
+  color: #153114;
+  background: linear-gradient(180deg, rgba(255, 241, 161, 0.98), rgba(112, 224, 125, 0.96));
+  box-shadow: 0 6px 0 rgba(59, 111, 40, 0.45), 0 0 0 4px rgba(255, 238, 153, 0.14);
 }
 
 .room-level-node:disabled:not(.active) {
-  opacity: 0.62;
+  opacity: 0.92;
+  border-color: rgba(210, 229, 221, 0.72);
+  background: linear-gradient(180deg, rgba(223, 235, 226, 0.9), rgba(139, 159, 150, 0.84));
+  box-shadow: 0 5px 0 rgba(41, 58, 50, 0.34);
+}
+
+.room-level-node.done:disabled,
+.room-level-node.done:disabled:not(.active) {
+  opacity: 1;
+}
+
+.room-level-node.done span,
+.room-level-node.done strong,
+.room-level-node.done small {
+  color: #153114;
+  text-shadow: none;
+}
+
+.room-level-node:disabled:not(.active):not(.done) span,
+.room-level-node:disabled:not(.active):not(.done) strong,
+.room-level-node:disabled:not(.active):not(.done) small {
+  color: #1f2d28;
+  text-shadow: none;
 }
 
 .room1-panel {
@@ -1245,15 +1269,20 @@ body.screen-briefing .app-shell {
 
 .room1-panel h3 {
   margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1.35rem;
+  margin-bottom: 0.35rem;
+  font-size: 1.22rem;
+}
+
+.room1-panel .eyebrow {
+  margin-bottom: 0.2rem;
 }
 
 .level-prompt {
   max-width: 76ch;
+  margin-top: 0.25rem;
   margin-bottom: 0;
   color: var(--muted);
-  line-height: 1.55;
+  line-height: 1.42;
 }
 
 .puzzle-grid {
@@ -1381,6 +1410,24 @@ body.screen-briefing .app-shell {
   font-weight: 800;
 }
 
+.room1-config-grid {
+  grid-template-columns: minmax(300px, 0.95fr) minmax(320px, 1.05fr);
+  align-items: start;
+}
+
+.room1-config-grid .option-grid {
+  grid-column: auto;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+
+.room1-config-grid .drop-slot {
+  grid-column: 1 / -1;
+  min-height: 2.8rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 1rem;
+}
+
 .level-feedback {
   margin-top: 1rem;
   border: 1px solid var(--line);
@@ -1402,7 +1449,7 @@ body.screen-briefing .app-shell {
 }
 
 .level-submit {
-  margin-top: 1rem;
+  margin-top: 0.65rem;
   min-width: 12rem;
 }
 
@@ -1999,18 +2046,49 @@ input,
   background:
     linear-gradient(180deg, rgba(255, 244, 204, 0.96), rgba(224, 161, 82, 0.94)),
     url("/assets/ui/adventure/panel_brown_arrows.png") center / 100% 100%;
+  padding: 0.82rem 1rem;
 }
 
 .status-box h3 {
-  margin-top: 0;
+  margin: 0 0 0.45rem;
   color: #704111;
   font-family: "Luckiest Guy", "Trebuchet MS", sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.15;
+}
+
+.status-panel .status-box {
+  margin-bottom: 0.55rem;
+  padding: 0.62rem 0.75rem;
+}
+
+.status-panel .metric-row {
+  min-height: 2.65rem;
+  border-radius: 15px;
+  padding: 0.45rem 0.8rem;
+  gap: 0.65rem;
+  line-height: 1.15;
+}
+
+.status-panel .metric-row span {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.status-panel .metric-row strong {
+  flex: 0 0 auto;
+  padding-left: 0.4rem;
+  font-size: 0.98rem;
+  line-height: 1;
 }
 
 .health-track {
   border: 2px solid rgba(65, 38, 16, 0.54);
   border-radius: 999px;
-  height: 1rem;
+  height: 0.86rem;
+  margin: 0.7rem 0 0.75rem;
   background: rgba(255, 248, 218, 0.85);
   overflow: hidden;
 }
@@ -2045,6 +2123,19 @@ input,
   color: #2b1b0c;
   background: #fff4ce;
   box-shadow: inset 0 3px 0 rgba(120, 70, 24, 0.16);
+}
+
+.sequence-board h4,
+.selected-order h4,
+.selected-order p {
+  color: #3a210c;
+  text-shadow: none;
+}
+
+.selected-order li {
+  border-color: rgba(74, 43, 15, 0.42);
+  color: #241407;
+  background: rgba(255, 241, 186, 0.9);
 }
 
 .option-grid button,
@@ -2126,6 +2217,48 @@ input,
   color: var(--game-ink);
 }
 
+.completion-summary {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.completion-summary .eyebrow {
+  margin: 0;
+  color: #8a531c;
+  text-shadow: none;
+}
+
+.completion-summary h2 {
+  margin: 0;
+  color: #3a210c;
+  text-shadow: none;
+}
+
+.completion-summary p {
+  margin: 0;
+  color: #2f2112;
+  line-height: 1.35;
+}
+
+.completion-message {
+  border: 2px solid rgba(24, 128, 58, 0.52);
+  border-radius: 16px;
+  padding: 0.75rem 0.9rem;
+  background: #b9f58c;
+  color: #073b18;
+  font-weight: 900;
+}
+
+.completion-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.completion-next-button {
+  justify-self: end;
+  min-width: 12rem;
+  margin-top: 0.15rem;
+}
+
 @keyframes pulseGlow {
   0%, 100% {
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5), 0 0 0 rgba(74, 222, 128, 0);
@@ -2204,6 +2337,9 @@ label,
 .status-panel > h2 {
   color: #3a210c;
   text-shadow: none;
+  margin: 0 0 0.55rem;
+  font-size: 1.28rem;
+  line-height: 1.15;
 }
 
 .world-room-card h3,
@@ -2295,6 +2431,14 @@ button,
   font-size: 0.98rem;
 }
 
+.status-panel button {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.58rem 0.9rem;
+  font-size: 0.9rem;
+  line-height: 1.15;
+}
+
 .modal-heading button {
   min-width: 5rem;
 }
@@ -2349,11 +2493,1141 @@ button,
   color: #062214;
 }
 
+.session-reset-button {
+  position: fixed;
+  right: 1rem;
+  bottom: 5.25rem;
+  z-index: 80;
+  border: 3px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  background: rgba(8, 12, 18, 0.78);
+  color: #fff7db;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+  font-family: var(--game-font);
+  font-size: 0.82rem;
+}
+
+.session-reset-button:hover {
+  transform: translateY(-2px);
+  background: rgba(8, 12, 18, 0.92);
+}
+
 @media (max-width: 700px) {
   .sound-toggle {
     right: 0.75rem;
     bottom: 0.75rem;
     padding: 0.65rem 0.95rem;
     font-size: 0.78rem;
+  }
+
+  .session-reset-button {
+    right: 0.75rem;
+    bottom: 4.65rem;
+    padding: 0.58rem 0.85rem;
+    font-size: 0.72rem;
+  }
+}
+
+/* 3D level markers for the mission map */
+.level-map-page {
+  perspective: 1100px;
+}
+
+.level-map-overlay {
+  transform-style: preserve-3d;
+}
+
+.world-room-card {
+  transform-style: preserve-3d;
+}
+
+.world-room-1 {
+  transform: rotate(-1.5deg) rotateX(5deg) rotateY(-7deg);
+}
+
+.world-room-2 {
+  transform: rotate(0.6deg) rotateX(5deg);
+}
+
+.world-room-3 {
+  transform: rotate(1.4deg) rotateX(5deg) rotateY(7deg);
+}
+
+.world-level-list {
+  perspective: 700px;
+  transform-style: preserve-3d;
+}
+
+.world-level-button {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  min-height: 3rem;
+  border: 0;
+  border-radius: 13px;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: translateZ(0) rotateX(12deg);
+  transform-style: preserve-3d;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.world-level-button::before {
+  content: "";
+  position: absolute;
+  inset: 0.42rem 0.18rem -0.34rem;
+  z-index: -2;
+  border-radius: 13px;
+  background: rgba(38, 21, 8, 0.42);
+  filter: blur(7px);
+  transform: translateZ(-22px);
+}
+
+.world-level-button::after {
+  content: "";
+  position: absolute;
+  inset: 0.35rem 0.12rem -0.34rem;
+  z-index: -1;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #7b4617, #3f2109);
+  transform: translateZ(-16px);
+}
+
+.level-3d-cap {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(70, 37, 9, 0.62);
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 22% 12%, rgba(255, 255, 255, 0.78), transparent 28%),
+    linear-gradient(180deg, #fff0a6 0%, #f6ba3f 52%, #bb641c 100%);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -4px 0 rgba(97, 49, 14, 0.38),
+    0 8px 0 #7f4318,
+    0 12px 18px rgba(0, 0, 0, 0.24);
+}
+
+.level-3d-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.45rem 0.55rem 0.55rem;
+  color: #2a1606;
+  text-shadow: 0 1px 0 rgba(255, 245, 190, 0.8);
+}
+
+.world-level-button .level-3d-content > span {
+  color: #2a1606;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.world-level-button .level-3d-content > small {
+  color: #3c230c;
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.world-level-button.active {
+  transform: translateZ(34px) rotateX(8deg) scale(1.04);
+  filter: saturate(1.12);
+}
+
+.world-level-button.active .level-3d-cap {
+  border-color: rgba(8, 88, 34, 0.88);
+  background:
+    radial-gradient(circle at 22% 12%, rgba(255, 255, 255, 0.86), transparent 30%),
+    linear-gradient(180deg, #bcff78 0%, #4ade80 52%, #148a46 100%);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -4px 0 rgba(4, 80, 36, 0.4),
+    0 9px 0 #0b6b39,
+    0 0 22px rgba(98, 255, 135, 0.6),
+    0 18px 26px rgba(0, 0, 0, 0.32);
+}
+
+.world-level-button.done .level-3d-cap {
+  border-color: rgba(23, 95, 52, 0.68);
+  background:
+    radial-gradient(circle at 22% 12%, rgba(255, 255, 255, 0.72), transparent 30%),
+    linear-gradient(180deg, #d7ffc7 0%, #86efac 56%, #2f9e56 100%);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -4px 0 rgba(13, 89, 43, 0.34),
+    0 7px 0 #17633a,
+    0 12px 18px rgba(0, 0, 0, 0.24);
+}
+
+.world-level-button.locked {
+  transform: translateZ(-8px) rotateX(16deg);
+}
+
+.world-level-button.locked .level-3d-cap {
+  filter: grayscale(0.45) brightness(0.72);
+  background:
+    radial-gradient(circle at 22% 12%, rgba(255, 255, 255, 0.42), transparent 28%),
+    linear-gradient(180deg, #b6aa95 0%, #817062 58%, #4d4036 100%);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -4px 0 rgba(38, 27, 20, 0.42),
+    0 5px 0 #38281f,
+    0 8px 14px rgba(0, 0, 0, 0.22);
+}
+
+.world-level-button.locked .level-3d-content,
+.world-level-button.locked .level-3d-content > span,
+.world-level-button.locked .level-3d-content > small {
+  color: #24180f;
+}
+
+button.world-level-button.active:hover {
+  transform: translateZ(42px) rotateX(5deg) scale(1.07);
+}
+
+@media (max-width: 900px) {
+  .world-level-button {
+    min-height: 2.65rem;
+  }
+
+  .level-3d-content {
+    padding: 0.38rem 0.45rem 0.48rem;
+  }
+
+  .world-level-button .level-3d-content > span {
+    font-size: 0.72rem;
+  }
+
+  .world-level-button .level-3d-content > small {
+    font-size: 0.56rem;
+  }
+}
+
+/* Room map spacing pass */
+.level-map-page {
+  width: min(1240px, 100%);
+  margin-top: 0.7rem;
+}
+
+.level-map-image {
+  height: clamp(25rem, 58vh, 38rem);
+  object-fit: cover;
+  object-position: center;
+}
+
+.world-room-card {
+  gap: 0.42rem;
+  width: min(27%, 19.5rem);
+  padding: 0.7rem;
+  border-radius: 18px;
+}
+
+.world-room-1 {
+  left: 3.2%;
+  bottom: 9%;
+}
+
+.world-room-2 {
+  left: 36.5%;
+  bottom: 9%;
+}
+
+.world-room-3 {
+  right: 3.2%;
+  bottom: 9%;
+}
+
+.world-room-card h3 {
+  font-size: clamp(0.9rem, 1.05vw, 1.18rem);
+}
+
+.world-room-card strong {
+  font-size: clamp(0.8rem, 0.9vw, 0.98rem);
+  line-height: 1.15;
+}
+
+.world-room-description {
+  margin: 0;
+  border: 2px solid rgba(28, 72, 47, 0.28);
+  border-radius: 12px;
+  padding: 0.42rem 0.5rem;
+  background: rgba(240, 255, 211, 0.78);
+  color: #1c3b19;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: clamp(0.66rem, 0.72vw, 0.78rem);
+  font-weight: 800;
+  line-height: 1.22;
+}
+
+.world-room-2 .world-room-description {
+  border-color: rgba(134, 73, 12, 0.34);
+  background: rgba(255, 236, 174, 0.82);
+  color: #60370d;
+}
+
+.world-room-3 .world-room-description {
+  border-color: rgba(46, 91, 137, 0.34);
+  background: rgba(218, 245, 255, 0.84);
+  color: #143d63;
+}
+
+.world-level-list {
+  gap: 0.55rem;
+  margin-top: 0.18rem;
+}
+
+.world-level-button {
+  min-height: 2.55rem;
+}
+
+.world-level-button::before {
+  inset: 0.34rem 0.18rem -0.24rem;
+  filter: blur(5px);
+}
+
+.world-level-button::after {
+  inset: 0.3rem 0.12rem -0.24rem;
+}
+
+.level-3d-cap {
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -3px 0 rgba(97, 49, 14, 0.34),
+    0 6px 0 #7f4318,
+    0 10px 15px rgba(0, 0, 0, 0.22);
+}
+
+.level-3d-content {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.45rem;
+  padding: 0.4rem 0.58rem 0.46rem;
+}
+
+.world-level-button .level-3d-content > span {
+  white-space: nowrap;
+  font-size: 0.76rem;
+}
+
+.world-level-button .level-3d-content > small {
+  font-size: 0.6rem;
+  line-height: 1.1;
+}
+
+@media (max-width: 980px) {
+  .level-map-image {
+    height: auto;
+    min-height: 42rem;
+  }
+
+  .level-map-overlay {
+    position: relative;
+    inset: auto;
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    background: linear-gradient(180deg, rgba(189, 239, 255, 0.8), rgba(255, 246, 211, 0.92));
+  }
+
+  .world-room-card,
+  .world-room-1,
+  .world-room-2,
+  .world-room-3 {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    transform: none;
+  }
+}
+
+/* Teammate-inspired island map and squad lobby */
+.mission-panel {
+  border: 0;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(78, 224, 130, 0.15), transparent 34%),
+    linear-gradient(180deg, rgba(8, 38, 52, 0.96), rgba(4, 21, 31, 0.96));
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+}
+
+.mission-hero {
+  align-items: center;
+  border-bottom: 0;
+  padding: 0.45rem 0.4rem 0.75rem;
+}
+
+.mission-hero h1 {
+  color: #fff9df;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.24);
+}
+
+.mission-hero h2 {
+  color: #ffd451;
+}
+
+.mission-hero p {
+  color: rgba(236, 250, 255, 0.82);
+}
+
+.briefing-chip {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  background: rgba(13, 49, 68, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.briefing-chip span,
+.briefing-chip small {
+  color: rgba(236, 250, 255, 0.76);
+}
+
+.briefing-chip strong {
+  color: #ffd451;
+}
+
+.team-chip > span {
+  color: #ffd451;
+  font-weight: 900;
+}
+
+.team-chip .briefing-player-list li {
+  border-color: rgba(255, 212, 81, 0.44);
+  color: #fff9df;
+  background: rgba(255, 212, 81, 0.14);
+}
+
+.team-chip .briefing-player-list li span {
+  color: #fff9df;
+  font-weight: 900;
+}
+
+.team-chip .briefing-player-list li small {
+  color: #8fffc2;
+}
+
+.island-map-page {
+  width: min(1240px, 100%);
+  border: 0;
+  border-radius: 0;
+  margin-top: 0;
+  background: transparent;
+  box-shadow: none;
+  perspective: 1200px;
+}
+
+.island-map-page .level-map-image {
+  height: clamp(26rem, 61vh, 40rem);
+  border: 5px solid rgba(5, 37, 54, 0.86);
+  border-radius: 26px;
+  object-fit: cover;
+  object-position: center;
+  background: #42d5e8;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.18), 0 18px 44px rgba(0, 0, 0, 0.42);
+}
+
+.island-map-page::after {
+  content: "Pick the active island to enter the current incident room";
+  position: absolute;
+  left: 50%;
+  bottom: 1.25rem;
+  z-index: 4;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  padding: 0.75rem 1.25rem;
+  color: #f9fbff;
+  background: rgba(6, 34, 49, 0.78);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34);
+  font-weight: 900;
+}
+
+.island-map-page .world-room-card {
+  width: min(19%, 14.5rem);
+  gap: 0.34rem;
+  border: 2px solid rgba(255, 212, 81, 0.85);
+  border-radius: 22px;
+  padding: 0.55rem;
+  background: rgba(8, 45, 64, 0.88);
+  color: #f8fbff;
+  box-shadow: 0 13px 0 rgba(5, 28, 41, 0.56), 0 20px 34px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(8px);
+}
+
+.island-map-page .world-room-1 {
+  left: 7.2%;
+  bottom: 8.5%;
+  transform: rotate(-5deg) rotateX(7deg);
+}
+
+.island-map-page .world-room-2 {
+  left: 40.8%;
+  bottom: 18.5%;
+  transform: rotate(3deg) rotateX(7deg);
+}
+
+.island-map-page .world-room-3 {
+  right: 9.2%;
+  top: 34.5%;
+  bottom: auto;
+  transform: rotate(5deg) rotateX(7deg);
+}
+
+.island-map-page .world-room-card.locked {
+  opacity: 0.86;
+  filter: grayscale(0.25);
+}
+
+.island-map-page .world-room-card.current-room {
+  border-color: #ffd451;
+  box-shadow: 0 13px 0 #8e5f08, 0 0 0 5px rgba(255, 212, 81, 0.2), 0 24px 42px rgba(0, 0, 0, 0.38);
+}
+
+.island-map-page .map-status {
+  justify-self: start;
+  border-radius: 999px;
+  padding: 0.22rem 0.5rem;
+  color: #103149;
+  background: #ffd451;
+  font-size: 0.58rem;
+}
+
+.island-map-page .world-room-card h3,
+.island-map-page .world-room-card strong {
+  color: #fff9df;
+}
+
+.island-map-page .world-room-card h3 {
+  font-size: 0.9rem;
+}
+
+.island-map-page .world-room-card strong {
+  font-size: 0.74rem;
+}
+
+.island-map-page .world-room-description {
+  display: none;
+}
+
+.island-map-page .world-level-list {
+  gap: 0.32rem;
+}
+
+.island-map-page .world-level-button {
+  min-height: 2.05rem;
+  transform: none;
+}
+
+.island-map-page .level-3d-cap {
+  border-radius: 999px;
+  background: rgba(255, 249, 223, 0.94);
+  box-shadow: 0 4px 0 rgba(48, 26, 5, 0.45);
+}
+
+.island-map-page .world-level-button.active .level-3d-cap {
+  background: linear-gradient(180deg, #fff176, #ffd451);
+  box-shadow: 0 5px 0 #95640a, 0 0 18px rgba(255, 212, 81, 0.68);
+}
+
+.island-map-page .world-level-button.done .level-3d-cap {
+  background: linear-gradient(180deg, #bbf7d0, #4ade80);
+}
+
+.island-map-page .world-level-button.locked .level-3d-cap {
+  background: linear-gradient(180deg, #d3dce4, #8c9aa7);
+}
+
+.island-map-page .level-3d-content {
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding: 0.28rem 0.5rem;
+  text-align: center;
+}
+
+.island-map-page .world-level-button .level-3d-content > span {
+  color: #0b2638;
+  font-size: 0.66rem;
+}
+
+.island-map-page .world-level-button .level-3d-content > small {
+  color: #25465b;
+  font-size: 0.52rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mission-lobby-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem;
+  width: min(1240px, 100%);
+  margin: 1.1rem auto 0;
+}
+
+.mission-rules-card {
+  grid-row: auto;
+}
+
+.squad-lobby-card,
+.active-mission-card,
+.squad-chat-card,
+.mission-rules-card {
+  border: 0;
+  border-radius: 24px;
+  padding: 1rem;
+  background: rgba(255, 252, 238, 0.82);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 0 rgba(11, 44, 61, 0.24), 0 20px 36px rgba(0, 0, 0, 0.28);
+}
+
+.mission-rule-list {
+  display: grid;
+  gap: 0.58rem;
+}
+
+.mission-rule-list span {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+  border: 2px solid rgba(18, 58, 86, 0.08);
+  border-radius: 16px;
+  padding: 0.58rem 0.7rem;
+  color: #26364a;
+  background: rgba(243, 249, 252, 0.82);
+  font-weight: 800;
+}
+
+.mission-rule-list strong {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border-radius: 999px;
+  color: #172033;
+  background: #ffd451;
+}
+
+.section-kicker {
+  margin-bottom: 0.5rem;
+  color: #617082;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.party-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.party-heading h3,
+.active-mission-card h3,
+.squad-chat-card h3 {
+  margin: 0;
+  color: #16263a;
+  font-size: 1.15rem;
+}
+
+.party-heading span {
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  color: #08723b;
+  background: #dffbea;
+  font-weight: 900;
+}
+
+.party-list {
+  display: grid;
+  gap: 0.62rem;
+}
+
+.party-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.65rem;
+  align-items: center;
+  border: 2px solid rgba(46, 182, 115, 0.28);
+  border-radius: 18px;
+  padding: 0.65rem;
+  color: #172033;
+  background: #f5fff8;
+}
+
+.party-card.open-slot {
+  border-style: dashed;
+  background: #fffaf0;
+}
+
+.party-avatar {
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+  font-weight: 900;
+}
+
+.party-card strong {
+  display: block;
+  color: #172033;
+}
+
+.party-card small {
+  color: #6b7280;
+  font-weight: 800;
+}
+
+.ready-pill {
+  border-radius: 999px;
+  padding: 0.35rem 0.55rem;
+  color: #047857;
+  background: #dcfce7;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.active-mission-card {
+  background: linear-gradient(180deg, rgba(255, 253, 244, 0.84), rgba(255, 247, 223, 0.78));
+}
+
+.active-mission-card p {
+  color: #334155;
+}
+
+.mission-briefing-card {
+  display: grid;
+  align-content: start;
+}
+
+.room-briefing-list {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.room-briefing-list article {
+  border: 2px solid rgba(18, 58, 86, 0.1);
+  border-radius: 18px;
+  padding: 0.75rem 0.85rem;
+  background: rgba(243, 249, 252, 0.82);
+}
+
+.room-briefing-list article.active {
+  border-color: rgba(245, 180, 0, 0.68);
+  background: rgba(255, 244, 207, 0.86);
+  box-shadow: inset 0 0 0 2px rgba(255, 212, 81, 0.2);
+}
+
+.room-briefing-list strong {
+  display: block;
+  color: #172033;
+  font-size: 0.98rem;
+}
+
+.room-briefing-list p {
+  margin: 0.3rem 0 0;
+  color: #475569;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.mission-cta {
+  width: 100%;
+  margin-top: 0.7rem;
+  border: 0;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  color: #172033;
+  background: linear-gradient(180deg, #ffe67a, #f5b400);
+  box-shadow: 0 6px 0 #986b05, 0 14px 22px rgba(0, 0, 0, 0.22);
+  font-family: var(--game-font);
+}
+
+.chat-feed {
+  display: grid;
+  gap: 0.45rem;
+  min-height: 6.8rem;
+  max-height: 8.6rem;
+  overflow: auto;
+  border-radius: 16px;
+  padding: 0.65rem;
+  background: #eff7fb;
+}
+
+.chat-feed p {
+  margin: 0;
+  color: #26364a;
+  font-size: 0.86rem;
+  line-height: 1.3;
+}
+
+.chat-feed strong {
+  color: #0f766e;
+}
+
+.chat-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  margin-top: 0.7rem;
+}
+
+.chat-form input {
+  border: 2px solid rgba(54, 91, 122, 0.22);
+  border-radius: 999px;
+  padding: 0.72rem 0.9rem;
+  color: #172033;
+  background: #fff;
+}
+
+.chat-form button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.7rem 0.95rem;
+  color: #fff;
+  background: #123a56;
+  font-weight: 900;
+}
+
+@media (max-width: 1100px) {
+  .mission-lobby-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-rules-card {
+    grid-row: auto;
+  }
+
+  .island-map-page .world-room-card {
+    width: min(28%, 13rem);
+  }
+}
+
+.game-map-screen {
+  display: grid;
+  gap: 0.9rem;
+  min-height: calc(100vh - 2rem);
+}
+
+.map-game-hud {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  width: min(1240px, 100%);
+  margin: 0 auto;
+  border-radius: 24px;
+  padding: 0.85rem 1.1rem;
+  background: rgba(8, 38, 52, 0.92);
+  box-shadow: 0 10px 0 rgba(5, 28, 41, 0.48), 0 20px 34px rgba(0, 0, 0, 0.32);
+}
+
+.map-game-hud h1 {
+  margin: 0;
+  color: #fff9df;
+  font-size: clamp(1.35rem, 2.2vw, 2.3rem);
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
+}
+
+.map-game-hud .eyebrow {
+  margin: 0 0 0.15rem;
+  color: #ffd451;
+}
+
+.map-hud-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.map-hud-chips span {
+  border-radius: 999px;
+  padding: 0.55rem 0.75rem;
+  color: #f8fbff;
+  background: rgba(255, 255, 255, 0.12);
+  font-weight: 900;
+}
+
+.map-hud-chips strong {
+  color: #ffd451;
+}
+
+.game-only-map {
+  margin: 0 auto;
+}
+
+.game-only-map .level-map-image {
+  height: min(72vh, 46rem);
+}
+
+.game-only-map::after {
+  content: "Click the highlighted island level to enter the active incident room";
+}
+
+body.screen-map .app-shell {
+  max-width: 100%;
+}
+
+@media (max-width: 760px) {
+  .map-game-hud {
+    display: grid;
+  }
+
+  .map-hud-chips {
+    justify-content: flex-start;
+  }
+}
+
+/* Full-bleed game map screen */
+body.screen-map {
+  background: #39c8df;
+}
+
+body.screen-map::before {
+  display: none;
+}
+
+body.screen-map .app-shell {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.game-map-screen {
+  position: relative;
+  min-height: 100vh;
+  gap: 0;
+  overflow: hidden;
+  background: #39c8df;
+}
+
+.map-game-hud {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  z-index: 8;
+  width: min(1180px, calc(100% - 2rem));
+  transform: translateX(-50%);
+  background: rgba(10, 50, 74, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.game-only-map {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  border-radius: 0;
+}
+
+.game-only-map .level-map-image {
+  width: 100%;
+  height: 100vh;
+  border: 0;
+  border-radius: 0;
+  object-fit: cover;
+  object-position: center;
+  box-shadow: none;
+}
+
+.game-only-map::after {
+  left: 50%;
+  bottom: 1.15rem;
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  text-align: center;
+}
+
+.game-only-map .level-map-overlay {
+  inset: 0;
+}
+
+.game-only-map .map-level-strip,
+.game-only-map .world-room-1.map-level-strip,
+.game-only-map .world-room-2.map-level-strip,
+.game-only-map .world-room-3.map-level-strip {
+  top: 6.5rem;
+  bottom: auto;
+  width: min(30vw, 21rem);
+  min-height: 0;
+  transform: none;
+}
+
+.game-only-map .world-room-1.map-level-strip {
+  left: 2rem;
+}
+
+.game-only-map .world-room-2.map-level-strip {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.game-only-map .world-room-3.map-level-strip {
+  right: 2rem;
+}
+
+.game-only-map .map-level-strip {
+  border-color: rgba(255, 255, 255, 0.52);
+  background: rgba(8, 45, 64, 0.74);
+  box-shadow: 0 10px 0 rgba(5, 28, 41, 0.32), 0 18px 34px rgba(0, 0, 0, 0.24);
+}
+
+.game-only-map .map-level-strip.current-room {
+  background: rgba(6, 60, 55, 0.78);
+}
+
+.game-only-map .world-level-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.42rem;
+}
+
+.game-only-map .world-level-button {
+  min-height: 2.6rem;
+}
+
+.game-only-map .world-level-button .level-3d-content > small {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .map-game-hud {
+    top: 0.65rem;
+    width: calc(100% - 1rem);
+    padding: 0.65rem;
+  }
+
+  .game-only-map .map-level-strip,
+  .game-only-map .world-room-1.map-level-strip,
+  .game-only-map .world-room-2.map-level-strip,
+  .game-only-map .world-room-3.map-level-strip {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    transform: none;
+  }
+
+  .game-only-map .level-map-overlay {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: 8.75rem 0.75rem 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(33, 165, 198, 0.16), transparent 55%);
+  }
+
+  .game-only-map .map-level-strip {
+    pointer-events: auto;
+  }
+}
+
+/* Compact map layout refinement */
+.map-game-hud {
+  top: 0.75rem;
+  padding: 0.62rem 0.9rem;
+  border-radius: 18px;
+}
+
+.map-game-hud h1 {
+  font-size: clamp(1.15rem, 1.75vw, 1.75rem);
+}
+
+.map-hud-chips span {
+  padding: 0.42rem 0.65rem;
+  font-size: 0.82rem;
+}
+
+.game-only-map .map-level-strip,
+.game-only-map .world-room-1.map-level-strip,
+.game-only-map .world-room-2.map-level-strip,
+.game-only-map .world-room-3.map-level-strip {
+  top: 5.65rem;
+  width: min(19vw, 14.5rem);
+  padding: 0.5rem;
+  border-radius: 18px;
+}
+
+.game-only-map .world-room-1.map-level-strip {
+  left: 4.5rem;
+}
+
+.game-only-map .world-room-2.map-level-strip {
+  left: 50%;
+}
+
+.game-only-map .world-room-3.map-level-strip {
+  right: 4.5rem;
+}
+
+.game-only-map .map-status {
+  padding: 0.18rem 0.42rem;
+  font-size: 0.52rem;
+}
+
+.game-only-map .world-room-card h3 {
+  font-size: 0.82rem;
+}
+
+.game-only-map .world-room-card strong {
+  font-size: 0.64rem;
+  line-height: 1.15;
+}
+
+.game-only-map .world-level-list {
+  grid-template-columns: 1fr;
+  gap: 0.28rem;
+}
+
+.game-only-map .world-level-button {
+  min-height: 1.85rem;
+}
+
+.game-only-map .level-3d-content {
+  padding: 0.23rem 0.45rem;
+}
+
+.game-only-map .world-level-button .level-3d-content > span {
+  font-size: 0.62rem;
+}
+
+.game-only-map .world-level-button .level-3d-content > small {
+  display: block;
+  font-size: 0.48rem;
+}
+
+.game-only-map::after {
+  bottom: 0.8rem;
+  padding: 0.58rem 1rem;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 1050px) {
+  .game-only-map .map-level-strip,
+  .game-only-map .world-room-1.map-level-strip,
+  .game-only-map .world-room-2.map-level-strip,
+  .game-only-map .world-room-3.map-level-strip {
+    width: min(25vw, 13.5rem);
+  }
+
+  .game-only-map .world-room-1.map-level-strip {
+    left: 1.5rem;
+  }
+
+  .game-only-map .world-room-3.map-level-strip {
+    right: 1.5rem;
   }
 }

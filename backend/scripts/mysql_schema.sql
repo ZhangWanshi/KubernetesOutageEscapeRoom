@@ -10,6 +10,13 @@ CREATE TABLE IF NOT EXISTS game_sessions (
     completed BOOLEAN NOT NULL,
     wrong_attempts INT NOT NULL,
     hints_used INT NOT NULL,
+    current_room_hints_used INT NOT NULL,
+    room1_current_level INT NOT NULL DEFAULT 1,
+    room1_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    room2_current_level INT NOT NULL DEFAULT 1,
+    room2_completed BOOLEAN NOT NULL DEFAULT FALSE,
+    room3_current_level INT NOT NULL DEFAULT 1,
+    room3_completed BOOLEAN NOT NULL DEFAULT FALSE,
     PRIMARY KEY (session_code)
 );
 

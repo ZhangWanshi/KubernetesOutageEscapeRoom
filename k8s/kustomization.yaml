@@ -1,0 +1,9 @@
+resources:
+  - namespace.yaml
+  - mysql-secret.yaml
+  - mysql-init-configmap.yaml
+  - mysql.yaml
+  - backend-configmap.yaml
+  - backend.yaml
+  - frontend.yaml
+  - backend-hpa.yaml

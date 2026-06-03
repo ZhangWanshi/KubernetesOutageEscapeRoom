@@ -57,7 +57,9 @@
   ],
   "correctActionId": "A",
   "hints": [
-    "Check whether the memory usage is higher than the configured memory limit."
+    "Check whether the memory usage is higher than the configured memory limit.",
+    "The OOMKilled event means the container exceeded its memory limit and Kubernetes terminated it.",
+    "The observed peak is 246Mi, but the configured memory limit is only 192Mi."
   ],
   "rootCause": "The metrics-aggregator container needed about 246Mi during bursts, but its memory limit was only 192Mi.",
   "learningPoint": "Container memory limits protect the cluster, but limits that are too low cause OOMKilled restarts and service instability."

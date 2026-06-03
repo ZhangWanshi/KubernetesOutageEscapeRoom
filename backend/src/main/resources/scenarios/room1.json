@@ -57,7 +57,9 @@
   ],
   "correctActionId": "C",
   "hints": [
-    "Compare the Order Service configuration with the Inventory API documentation. Look carefully at the endpoint path."
+    "Compare the Order Service configuration with the Inventory API documentation. Look carefully at the endpoint path.",
+    "The Order Service is calling Inventory Service through a configured path, not a hard-coded browser route.",
+    "The configured path `/invent` does not match the documented endpoint `/api/inventory/check`."
   ],
   "rootCause": "Order Service called /invent, but Inventory Service exposes /api/inventory/check.",
   "learningPoint": "Healthy microservices can still fail when API contracts or configured endpoint paths do not match."
