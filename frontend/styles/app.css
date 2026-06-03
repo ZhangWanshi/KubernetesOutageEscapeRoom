@@ -327,7 +327,7 @@
   .target-card h3 { font-family: 'Fredoka'; font-weight: 600; font-size: 22px; color: var(--navy); }
   .tc-dom { color: var(--muted); font-weight: 700; font-size: 13px; margin-top: 2px; }
   .diffsel { display: flex; gap: 7px; margin: 14px 0; }
-  .diffopt { flex: 1; font-family: 'Fredoka'; font-weight: 600; font-size: 13px; padding: 9px; border: 2px solid var(--line); background: #fff; border-radius: 11px; cursor: pointer; transition: .14s; }
+  .diffopt { flex: 1; font-family: 'Fredoka'; font-weight: 600; font-size: 13px; padding: 9px; border: 2px solid var(--line); background: #fff; border-radius: 11px; cursor: default; transition: .14s; display: block; text-align: center; }
   .diffopt[data-diff="Easy"] { color: #3FB36B; }
   .diffopt[data-diff="Medium"] { color: #E8A904; }
   .diffopt[data-diff="Hard"] { color: #E23B2E; }

@@ -100,7 +100,6 @@ function LobbyView() {
   const cycleRole = (cid) => setL((p) => ({
     ...p, party: p.party.map((m) => m.c === cid ? { ...m, role: ROLES[(ROLES.indexOf(m.role) + 1) % ROLES.length] } : m),
   }));
-  const setDiff = (d) => setL((p) => ({ ...p, diff: d }));
   const invite = (cid) => {
     if (!sessionCode) return;
     window.Api.approvePlayer(sessionCode, cid)
@@ -211,7 +210,7 @@ function LobbyView() {
                 <p className="tc-dom">{target.domain}</p>
                 <div className="diffsel">
                   {['Easy', 'Medium', 'Hard'].map((d) => (
-                    <button key={d} className={'diffopt' + (L.diff === d ? ' on' : '')} data-diff={d} onClick={() => setDiff(d)}>{d}</button>
+                    <span key={d} className={'diffopt' + (L.diff === d ? ' on' : '')} data-diff={d}>{d}</span>
                   ))}
                 </div>
                 <div className="tc-reward">
