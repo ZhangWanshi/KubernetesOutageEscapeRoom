@@ -35,6 +35,7 @@ function RoomView() {
   const [cause, setCause] = React.useState(null);
   const [fix, setFix] = React.useState(null);
   const [hintUsed, setHintUsed] = React.useState(false);
+  const [openStep, setOpenStep] = React.useState(1);
 
   // Notify backend when player opens the room
   React.useEffect(() => {
@@ -159,24 +160,34 @@ function RoomView() {
                 </div>
                 <div className="hudbody">
                   <div className="ops-prog"><span style={{ width: pct + '%' }} /></div>
-                  <div className="ops-step">
-                    <div className="ops-steplab"><span className="step-n">1</span> Identify the root cause</div>
-                    <div className="opts">
-                      {c.cause.opts.map((o, i) => (
-                        <button key={i} className={'opt' + (cause === i ? ' sel' : '')} onClick={() => setCause(i)}>
-                          <span className="dot" /><span>{o.t}</span>
-                        </button>
-                      ))}
+                  <div className={'ops-step' + (openStep === 1 ? ' ops-step--open' : '')}>
+                    <div className="ops-steplab" onClick={() => setOpenStep(openStep === 1 ? null : 1)} style={{ cursor: 'pointer' }}>
+                      <span className="step-n">1</span> Identify the root cause
+                      <span className="step-chevron">▼</span>
+                    </div>
+                    <div className="ops-step-body">
+                      <div className="opts">
+                        {c.cause.opts.map((o, i) => (
+                          <button key={i} className={'opt' + (cause === i ? ' sel' : '')} onClick={() => { setCause(i); setOpenStep(2); }}>
+                            <span className="dot" /><span>{o.t}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="ops-step">
-                    <div className="ops-steplab"><span className="step-n">2</span> Choose a remediation</div>
-                    <div className="opts">
-                      {c.fix.opts.map((o, i) => (
-                        <button key={i} className={'opt' + (fix === i ? ' sel' : '')} onClick={() => setFix(i)}>
-                          <span className="dot" /><span>{o.t}</span>
-                        </button>
-                      ))}
+                  <div className={'ops-step' + (openStep === 2 ? ' ops-step--open' : '')}>
+                    <div className="ops-steplab" onClick={() => setOpenStep(openStep === 2 ? null : 2)} style={{ cursor: 'pointer' }}>
+                      <span className="step-n">2</span> Choose a remediation
+                      <span className="step-chevron">▼</span>
+                    </div>
+                    <div className="ops-step-body">
+                      <div className="opts">
+                        {c.fix.opts.map((o, i) => (
+                          <button key={i} className={'opt' + (fix === i ? ' sel' : '')} onClick={() => { setFix(i); setOpenStep(null); }}>
+                            <span className="dot" /><span>{o.t}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <button className="btn-submit" disabled={!ready} onClick={submit}>Execute resolution ⚡</button>

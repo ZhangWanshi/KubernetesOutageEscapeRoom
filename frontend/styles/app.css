@@ -521,9 +521,15 @@
   #view-room .ops-protocol .hudbody { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 13px; }
   #view-room .ops-prog { height: 6px; background: rgba(255,255,255,.08); border-radius: 20px; overflow: hidden; flex: none; }
   #view-room .ops-prog span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--rs-accent,#5FD08A) 60%, #2BB6A8), var(--rs-accent,#5FD08A)); border-radius: 20px; transition: width .45s ease; }
-  #view-room .ops-step { display: flex; flex-direction: column; }
-  #view-room .ops-steplab { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #9bb3a3; margin-bottom: 10px; }
+  #view-room .ops-step { display: flex; flex-direction: column; border: 1px solid rgba(120,210,150,.1); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; }
+  #view-room .ops-step--open { border-color: rgba(120,210,150,.25); background: rgba(255,255,255,.02); }
+  #view-room .ops-steplab { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #9bb3a3; margin-bottom: 0; user-select: none; }
+  #view-room .ops-step--open .ops-steplab { color: #c8ddd0; }
   #view-room .ops-steplab .step-n { display: inline-grid; place-items: center; width: 19px; height: 19px; border-radius: 50%; background: var(--rs-accent, #4FB23A); color: #06140c; font-size: 11px; font-weight: 800; }
+  #view-room .ops-steplab .step-chevron { margin-left: auto; font-size: 9px; opacity: .5; transition: transform .28s ease; }
+  #view-room .ops-step--open .ops-steplab .step-chevron { transform: rotate(180deg); opacity: .8; }
+  #view-room .ops-step-body { max-height: 0; overflow: hidden; opacity: 0; transition: max-height .32s ease, opacity .25s ease; padding-top: 0; }
+  #view-room .ops-step--open .ops-step-body { max-height: 400px; opacity: 1; transition: max-height .38s ease, opacity .28s ease .06s; padding-top: 10px; }
   #view-room .ops-room .opts { display: flex; flex-direction: column; gap: 8px; }
   #view-room .ops-room .opt { display: flex; align-items: flex-start; gap: 10px; text-align: left; padding: 11px 13px;
     border: 1.5px solid rgba(120,210,150,.16); background: rgba(255,255,255,.03); border-radius: 11px; cursor: pointer;
