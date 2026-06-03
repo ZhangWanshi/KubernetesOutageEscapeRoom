@@ -137,8 +137,11 @@ function App() {
     const attempt = roomAttempts[room.id] || { wrongAnswers: 0, hintsUsed: 0 };
     const roomScore = calcRoomScore(room.diff, attempt.wrongAnswers, attempt.hintsUsed);
 
+    const starDeduction = res.correct ? (3 - Math.max(1, Math.min(3, res.stars || 3))) * 5 : 0;
+    const earnedXP = res.correct ? (SCORE_CONFIG.completionXP[room.diff] || 350) - starDeduction : 0;
+
     if (res.correct) {
-      setTotalScore(prev => prev + (SCORE_CONFIG.completionXP[room.diff] || 350));
+      setTotalScore(prev => prev + earnedXP);
     } else {
       setTotalScore(prev => prev - (SCORE_CONFIG.wrongPenalty[room.diff] || 10));
       setRoomAttempts((prev) => {
@@ -152,7 +155,7 @@ function App() {
       roomScore: res.correct ? roomScore : 0,
       wrongAnswers: attempt.wrongAnswers + (res.correct ? 0 : 1),
       hintsUsed: attempt.hintsUsed,
-      xp: res.correct ? (SCORE_CONFIG.completionXP[room.diff] || 350) : 0,
+      xp: earnedXP,
     };
 
     if (res.correct) completeRoom(room.id, res.stars);
