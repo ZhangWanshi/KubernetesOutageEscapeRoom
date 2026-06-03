@@ -240,11 +240,7 @@ function App() {
     chars: r.id === activeRoomId ? playerNames : [],
   }));
 
-  // liveScore projects the current in-progress room's base score onto the running total,
-  // so wrong-answer and hint penalties are immediately visible even before room completion.
-  const needsProjection = view === 'room' || (view === 'results' && result && !result.correct);
-  const roomProjection = needsProjection && activeRoom ? (SCORE_CONFIG.base[activeRoom.diff] || 0) : 0;
-  const liveScore = Math.max(0, totalScore + roomProjection);
+  const liveScore = Math.max(0, totalScore);
 
   const ctx = {
     rooms: roomsWithChars, view, activeRoom, result, lobbyTarget, util, soundOn, player,
