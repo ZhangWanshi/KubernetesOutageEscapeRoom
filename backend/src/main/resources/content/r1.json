@@ -1,0 +1,229 @@
+{
+  "type": "cause-fix",
+  "levels": [
+    {
+      "mission": "A freshly deployed pod keeps flapping between Running and CrashLoopBackOff. Work through the evidence before you touch the cluster.",
+      "evidence": [
+        {
+          "tab": "Pod status",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get pods",
+            "NAME              READY   STATUS             RESTARTS",
+            "web-7c9f-2xk4     0/1     CrashLoopBackOff   6 (12s ago)"
+          ]
+        },
+        {
+          "tab": "Container logs",
+          "kind": "term",
+          "lines": [
+            "$ kubectl logs web-7c9f-2xk4 --previous",
+            "Error: env DATABASE_URL is required but was empty",
+            "process exited with code 1"
+          ]
+        },
+        {
+          "tab": "Events",
+          "kind": "term",
+          "lines": [
+            "$ kubectl describe pod web-7c9f-2xk4 | tail -3",
+            "Warning  BackOff   restarting failed container web",
+            "Normal   Pulled    Container image \"web:1.4\" already present"
+          ]
+        }
+      ],
+      "cause": {
+        "opts": [
+          {
+            "t": "The container image tag does not exist in the registry",
+            "c": false
+          },
+          {
+            "t": "A required environment variable is missing from the spec",
+            "c": true
+          },
+          {
+            "t": "The node is out of memory and evicting the pod",
+            "c": false
+          },
+          {
+            "t": "The readiness probe path returns 404",
+            "c": false
+          }
+        ]
+      },
+      "fix": {
+        "opts": [
+          {
+            "t": "Add the missing DATABASE_URL env var to the container spec",
+            "c": true
+          },
+          {
+            "t": "Increase the CPU limit and redeploy",
+            "c": false
+          },
+          {
+            "t": "Disable the liveness probe",
+            "c": false
+          },
+          {
+            "t": "Rebuild and re-push the Docker image",
+            "c": false
+          }
+        ]
+      },
+      "hint": "The container exits on startup \u2014 before any probe runs. Read the --previous logs."
+    },
+    {
+      "mission": "After migrating to a private registry, the web pod can no longer start. Images that were accessible yesterday now fail to pull entirely.",
+      "evidence": [
+        {
+          "tab": "Pod status",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get pods",
+            "NAME              READY   STATUS             RESTARTS",
+            "web-7c9f-4m2p     0/1     ImagePullBackOff   0 (30s ago)"
+          ]
+        },
+        {
+          "tab": "Events",
+          "kind": "term",
+          "lines": [
+            "$ kubectl describe pod web-7c9f-4m2p | tail -4",
+            "Warning  Failed    Failed to pull image \"registry.internal/web:2.0\"",
+            "         unexpected status code 401 Unauthorized"
+          ]
+        },
+        {
+          "tab": "Pod spec",
+          "kind": "yaml",
+          "lines": [
+            "spec:",
+            "  containers:",
+            "  - image: registry.internal/web:2.0",
+            "    name: web",
+            "  # imagePullSecrets: []  <-- not set"
+          ]
+        }
+      ],
+      "cause": {
+        "opts": [
+          {
+            "t": "The image tag 2.0 does not exist in the registry",
+            "c": false
+          },
+          {
+            "t": "No imagePullSecrets configured \u2014 nodes cannot auth to the private registry",
+            "c": true
+          },
+          {
+            "t": "The container port mapping is wrong",
+            "c": false
+          },
+          {
+            "t": "The node is cordoned and cannot pull images",
+            "c": false
+          }
+        ]
+      },
+      "fix": {
+        "opts": [
+          {
+            "t": "Create a docker-registry Secret and add it to the pod spec under imagePullSecrets",
+            "c": true
+          },
+          {
+            "t": "Change the image tag to latest",
+            "c": false
+          },
+          {
+            "t": "Delete the pod and let it reschedule",
+            "c": false
+          },
+          {
+            "t": "Rebuild the image and push it again",
+            "c": false
+          }
+        ]
+      },
+      "hint": "A 401 means authentication failed. Kubernetes needs a Secret of type docker-registry to pull from private registries."
+    },
+    {
+      "mission": "A new service has an init container that runs DB migrations before the main app starts. The pod is stuck in Init:CrashLoopBackOff \u2014 the main container never launches.",
+      "evidence": [
+        {
+          "tab": "Pod status",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get pods",
+            "NAME     READY   STATUS                  RESTARTS",
+            "app-0    0/1     Init:CrashLoopBackOff   5 (2m ago)"
+          ]
+        },
+        {
+          "tab": "Init logs",
+          "kind": "term",
+          "lines": [
+            "$ kubectl logs app-0 -c migrate",
+            "dial tcp: connect to postgres.default.svc:5432: connection refused",
+            "FATAL: migration failed \u2014 exiting"
+          ]
+        },
+        {
+          "tab": "Init spec",
+          "kind": "yaml",
+          "lines": [
+            "initContainers:",
+            "- name: migrate",
+            "  image: migrate-tool:1.0",
+            "  env:",
+            "  - name: DB_HOST",
+            "    value: \"postgres.default.svc\"  # wrong namespace"
+          ]
+        }
+      ],
+      "cause": {
+        "opts": [
+          {
+            "t": "The init container image is corrupted and cannot run",
+            "c": false
+          },
+          {
+            "t": "DB_HOST points to the wrong namespace \u2014 the database lives in the data namespace",
+            "c": true
+          },
+          {
+            "t": "Init containers cannot access environment variables",
+            "c": false
+          },
+          {
+            "t": "The main container is blocking the init container from completing",
+            "c": false
+          }
+        ]
+      },
+      "fix": {
+        "opts": [
+          {
+            "t": "Update DB_HOST to postgres.data.svc.cluster.local to reach the correct namespace",
+            "c": true
+          },
+          {
+            "t": "Delete the init container definition entirely",
+            "c": false
+          },
+          {
+            "t": "Add a longer sleep before the migration runs",
+            "c": false
+          },
+          {
+            "t": "Switch to a newer version of the migration image",
+            "c": false
+          }
+        ]
+      },
+      "hint": "Kubernetes DNS is <svc>.<namespace>.svc.cluster.local. The init container resolves the wrong namespace."
+    }
+  ]
+}

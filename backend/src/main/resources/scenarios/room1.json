@@ -1,0 +1,64 @@
+{
+  "roomId": 1,
+  "name": "Microservice Incident Response",
+  "theme": "Forest",
+  "difficulty": "EASY",
+  "failureArea": "APIs / microservices",
+  "timeLimitSeconds": 300,
+  "story": "A production incident has affected the Customer Management Platform. Your task is to restore the system by checking service health, identifying service responsibilities, and fixing a missing configuration value.",
+  "evidence": [
+    {
+      "type": "SERVICE_MAP",
+      "title": "Service Dependency Map",
+      "content": "Browser -> API Gateway -> Order Service -> Inventory Service"
+    },
+    {
+      "type": "API_RESPONSE",
+      "title": "Order API Response",
+      "content": "POST /api/orders returns HTTP 500.\nError: Unable to complete order.\nFailure occurs when Order Service calls Inventory Service."
+    },
+    {
+      "type": "LOG",
+      "title": "Order Service Logs",
+      "content": "INFO Received order request for productId=45\nINFO Calling Inventory Service\nERROR Connection failed while calling inventory endpoint"
+    },
+    {
+      "type": "API_DOC",
+      "title": "Inventory API Documentation",
+      "content": "Available endpoint:\nGET /api/inventory/check?productId={id}"
+    },
+    {
+      "type": "CONFIG",
+      "title": "Order Service Config",
+      "content": "inventory.service.base-url=http://inventory-service\ninventory.service.check-path=/invent"
+    }
+  ],
+  "actions": [
+    {
+      "id": "A",
+      "text": "Restart the Order Service pod"
+    },
+    {
+      "id": "B",
+      "text": "Increase memory limit for Order Service"
+    },
+    {
+      "id": "C",
+      "text": "Update the Inventory Service path to /api/inventory/check"
+    },
+    {
+      "id": "D",
+      "text": "Scale Inventory Service to 3 replicas"
+    },
+    {
+      "id": "E",
+      "text": "Delete and recreate the database"
+    }
+  ],
+  "correctActionId": "C",
+  "hints": [
+    "Compare the Order Service configuration with the Inventory API documentation. Look carefully at the endpoint path."
+  ],
+  "rootCause": "Order Service called /invent, but Inventory Service exposes /api/inventory/check.",
+  "learningPoint": "Healthy microservices can still fail when API contracts or configured endpoint paths do not match."
+}

@@ -1,0 +1,64 @@
+{
+  "roomId": 3,
+  "name": "Kubernetes Service Routing Fix",
+  "theme": "Kubernetes Command Center",
+  "difficulty": "HARD",
+  "failureArea": "Kubernetes service discovery",
+  "timeLimitSeconds": 420,
+  "story": "A Kubernetes service is running, and the application pods are healthy, but user traffic is not reaching the application. Your task is to inspect the service, follow the correct debugging sequence, and apply the correct selector fix.",
+  "evidence": [
+    {
+      "type": "POD_STATUS",
+      "title": "Pod Status",
+      "content": "game-api pod is Running.\nReadiness probe is passing.\nLabels: app=game-api, tier=backend"
+    },
+    {
+      "type": "SERVICE",
+      "title": "Service Description",
+      "content": "service/game-api\nSelector: app=api\nEndpoints: <none>"
+    },
+    {
+      "type": "LOG",
+      "title": "API Logs",
+      "content": "INFO Started Game API on port 8081\nINFO Readiness check passed\nINFO No incoming requests"
+    },
+    {
+      "type": "HEALTH_CHECK",
+      "title": "Health Check",
+      "content": "GET http://pod-ip:8081/actuator/health -> 200 UP"
+    },
+    {
+      "type": "YAML",
+      "title": "Deployment Labels",
+      "content": "metadata.labels.app=game-api\nspec.template.metadata.labels.app=game-api"
+    }
+  ],
+  "actions": [
+    {
+      "id": "A",
+      "text": "Fix the Service selector so it matches app=game-api"
+    },
+    {
+      "id": "B",
+      "text": "Increase the API CPU limit"
+    },
+    {
+      "id": "C",
+      "text": "Rebuild the Docker image"
+    },
+    {
+      "id": "D",
+      "text": "Delete the readiness probe"
+    },
+    {
+      "id": "E",
+      "text": "Scale the database StatefulSet"
+    }
+  ],
+  "correctActionId": "A",
+  "hints": [
+    "Compare the Service selector with the Deployment pod labels."
+  ],
+  "rootCause": "The Service selected app=api, but the Deployment pods were labelled app=game-api, so Kubernetes created no endpoints.",
+  "learningPoint": "Kubernetes Services route to pods through label selectors. A small label mismatch can make healthy pods unreachable."
+}

@@ -1,9 +1,9 @@
-HELP.md
+backend/HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
+backend/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-!.mvn/wrapper/maven-wrapper.properties
+!backend/.mvn/wrapper/maven-wrapper.properties
 
 ### STS ###
 .apt_generated
@@ -35,6 +35,15 @@ build/
 
 # Log files
 *.log
+*.err
+
+# H2 database files
+*.mv.db
+*.trace.db
+
+# Frontend generated files
+frontend/node_modules/
+frontend/dist/
 
 # Crash dumps
         ### Linux / Mac OS X ###

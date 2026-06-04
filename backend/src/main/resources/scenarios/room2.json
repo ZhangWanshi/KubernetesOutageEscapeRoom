@@ -1,0 +1,64 @@
+{
+  "roomId": 2,
+  "name": "Desert Resource Survival",
+  "theme": "Desert",
+  "difficulty": "MEDIUM",
+  "failureArea": "Containers / resource limits",
+  "timeLimitSeconds": 360,
+  "story": "The metrics pipeline is stranded in a resource desert. The pod starts, then dies whenever telemetry volume rises.",
+  "evidence": [
+    {
+      "type": "POD_STATUS",
+      "title": "Pod Status",
+      "content": "metrics-aggregator-7c9d8f: CrashLoopBackOff\nLast State: Terminated\nReason: OOMKilled\nExit Code: 137"
+    },
+    {
+      "type": "METRIC",
+      "title": "Memory Metrics",
+      "content": "Container memory usage peaks at 246Mi during ingestion bursts."
+    },
+    {
+      "type": "CONFIG",
+      "title": "Deployment Resource Limits",
+      "content": "requests.memory=128Mi\nlimits.memory=192Mi"
+    },
+    {
+      "type": "LOG",
+      "title": "Aggregator Logs",
+      "content": "INFO Loaded 50000 metric samples\nWARN Heap pressure above 90%\nERROR Process terminated before batch flush"
+    },
+    {
+      "type": "K8S_EVENT",
+      "title": "Kubernetes Events",
+      "content": "Container metrics-aggregator was killed because it exceeded its memory limit."
+    }
+  ],
+  "actions": [
+    {
+      "id": "A",
+      "text": "Increase the metrics-aggregator memory limit and request"
+    },
+    {
+      "id": "B",
+      "text": "Change the Service selector"
+    },
+    {
+      "id": "C",
+      "text": "Disable the readiness probe"
+    },
+    {
+      "id": "D",
+      "text": "Restart the database pod"
+    },
+    {
+      "id": "E",
+      "text": "Rename the container image tag"
+    }
+  ],
+  "correctActionId": "A",
+  "hints": [
+    "Check whether the memory usage is higher than the configured memory limit."
+  ],
+  "rootCause": "The metrics-aggregator container needed about 246Mi during bursts, but its memory limit was only 192Mi.",
+  "learningPoint": "Container memory limits protect the cluster, but limits that are too low cause OOMKilled restarts and service instability."
+}

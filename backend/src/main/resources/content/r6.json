@@ -1,0 +1,149 @@
+{
+  "type": "sequence",
+  "levels": [
+    {
+      "mission": "Traffic spiked but the HPA never scaled. Arrange the correct sequence to investigate the autoscaler and restore its ability to react.",
+      "evidence": [
+        {
+          "tab": "HPA",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get hpa",
+            "NAME      REFERENCE        TARGETS         REPLICAS",
+            "web-hpa   Deployment/web   <unknown>/70%   1"
+          ]
+        },
+        {
+          "tab": "HPA events",
+          "kind": "term",
+          "lines": [
+            "$ kubectl describe hpa web-hpa | grep -i cpu",
+            "failed to get cpu utilization:",
+            "missing request for cpu on container web"
+          ]
+        },
+        {
+          "tab": "Metrics API",
+          "kind": "term",
+          "lines": [
+            "$ kubectl top pods",
+            "error: Metrics API not available",
+            "(no cpu/memory baseline to scale against)"
+          ]
+        }
+      ],
+      "hint": "Confirm the HPA target shows <unknown>, find why it cannot compute utilization, then fix the root cause.",
+      "intro": "Arrange the five steps to restore HPA scaling:",
+      "steps": [
+        "Confirm the HPA is stuck: kubectl get hpa \u2014 TARGETS shows <unknown>/70%",
+        "Describe the HPA to read the error: kubectl describe hpa web-hpa \u2014 missing cpu request",
+        "Inspect the Deployment resource spec \u2014 confirm CPU requests field is absent",
+        "Add CPU requests to the Deployment container spec and trigger a rollout",
+        "Watch the HPA recover: kubectl get hpa -w \u2014 TARGETS shows a real percentage"
+      ]
+    },
+    {
+      "mission": "The application fails to authenticate to its database after a secret rotation. Arrange the complete investigation and recovery steps.",
+      "evidence": [
+        {
+          "tab": "App logs",
+          "kind": "term",
+          "lines": [
+            "$ kubectl logs app-0 | grep -i \"auth\\|password\"",
+            "FATAL DB authentication failed: invalid password",
+            "retrying... (attempt 3 of 3)"
+          ]
+        },
+        {
+          "tab": "Secret",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get secret db-creds -o yaml | grep creationTimestamp",
+            "creationTimestamp: \"2024-01-15T09:41:00Z\"  # updated 10m ago"
+          ]
+        },
+        {
+          "tab": "Pod env",
+          "kind": "term",
+          "lines": [
+            "$ kubectl exec app-0 -- printenv DB_PASSWORD",
+            "old_password_hash_abc123   # stale \u2014 from before rotation"
+          ]
+        }
+      ],
+      "hint": "Env vars from Secrets are snapshot at pod start. A rollout restart is required to pick up the new value.",
+      "intro": "Arrange the six steps for Secret rotation recovery:",
+      "steps": [
+        "Read pod logs to confirm the authentication failure message",
+        "Verify the Secret exists and was recently updated: kubectl get secret db-creds",
+        "Check the env var value in the running pod: kubectl exec app-0 -- printenv DB_PASSWORD",
+        "Confirm the running value is stale \u2014 it predates the Secret rotation",
+        "Fix the secretKeyRef name in the Deployment if it is wrong (or confirm it is correct)",
+        "Restart the deployment to pick up the new Secret: kubectl rollout restart deploy/app"
+      ]
+    },
+    {
+      "mission": "A full production incident is in progress. Multiple pods are failing across namespaces. Arrange the complete incident response sequence from triage to verified recovery.",
+      "evidence": [
+        {
+          "tab": "Cluster state",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get pods --all-namespaces | grep -v Running",
+            "NAMESPACE     NAME            STATUS",
+            "production    api-0           CrashLoopBackOff",
+            "production    worker-3        OOMKilled",
+            "data          db-proxy-2      Error"
+          ]
+        },
+        {
+          "tab": "Events",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get events -A --sort-by=.metadata.creationTimestamp | tail -5",
+            "Warning  OOMKilled       worker-3: memory limit exceeded",
+            "Warning  BackOff         api-0: restarting failed container",
+            "Warning  FailedMount     db-proxy-2: secret not found"
+          ]
+        },
+        {
+          "tab": "Incident scope",
+          "kind": "metrics",
+          "rows": [
+            [
+              "Failing pods",
+              "3",
+              "err"
+            ],
+            [
+              "Affected namespaces",
+              "2",
+              "warn"
+            ],
+            [
+              "Active alerts",
+              "5",
+              "err"
+            ],
+            [
+              "Estimated impact",
+              "P1 \u2014 full outage",
+              "err"
+            ]
+          ]
+        }
+      ],
+      "hint": "Triage before touching anything. Read events cluster-wide, isolate root causes per component, fix, then verify end-to-end.",
+      "intro": "Arrange the seven incident response steps in the correct order:",
+      "steps": [
+        "Triage scope: kubectl get pods --all-namespaces \u2014 identify all failing workloads",
+        "Read cluster-wide events sorted by time: kubectl get events -A --sort-by=.metadata.creationTimestamp",
+        "Isolate each root component causing failures by reading its describe output",
+        "Read crash logs from each failing pod: kubectl logs <pod> --previous",
+        "Apply targeted fixes per issue (env var, selector, resource limit, or rollback)",
+        "Verify each fix propagates: kubectl rollout status deploy/<name> for each component",
+        "Confirm end-to-end service health with a test request against the production endpoint"
+      ]
+    }
+  ]
+}
