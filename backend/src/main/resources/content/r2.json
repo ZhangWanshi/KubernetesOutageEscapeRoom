@@ -1,0 +1,190 @@
+{
+  "type": "fill-blank",
+  "levels": [
+    {
+      "mission": "The app boots in ERROR log level despite the ConfigMap being set to debug. The Deployment references the wrong ConfigMap name and key.",
+      "evidence": [
+        {
+          "tab": "App logs",
+          "kind": "term",
+          "lines": [
+            "$ kubectl logs app-7x2k | head -3",
+            "INFO  starting with log level: ERROR (default fallback)",
+            "WARN  env var LOG_LEVEL not found, using default"
+          ]
+        },
+        {
+          "tab": "ConfigMap",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get configmap app-config -o yaml",
+            "data:",
+            "  LOG_LEVEL: \"debug\""
+          ]
+        },
+        {
+          "tab": "Deployment",
+          "kind": "yaml",
+          "lines": [
+            "env:",
+            "- name: LOG_LEVEL",
+            "  valueFrom:",
+            "    configMapKeyRef:",
+            "      name: app-settings   # wrong name",
+            "      key: log_level       # wrong key case"
+          ]
+        }
+      ],
+      "hint": "The ConfigMap is named app-config. ConfigMap keys are case-sensitive: check LOG_LEVEL vs log_level.",
+      "intro": "Complete the correct ConfigMap reference in the Deployment spec:",
+      "template": [
+        "env:",
+        "  - name: LOG_LEVEL",
+        "    valueFrom:",
+        "      configMapKeyRef:",
+        "        name: [blank 1]",
+        "        key:  [blank 2]"
+      ],
+      "blanks": [
+        {
+          "answer": "app-config",
+          "label": "[blank 1] \u2014 ConfigMap name",
+          "placeholder": "e.g. my-config"
+        },
+        {
+          "answer": "LOG_LEVEL",
+          "label": "[blank 2] \u2014 Key name",
+          "placeholder": "e.g. MY_KEY"
+        }
+      ]
+    },
+    {
+      "mission": "The app cannot connect to the database \u2014 the password env var is empty. The Secret exists, but the Deployment has the wrong Secret name and key.",
+      "evidence": [
+        {
+          "tab": "App logs",
+          "kind": "term",
+          "lines": [
+            "$ kubectl logs api-pod | head -2",
+            "FATAL DB connection refused: password is empty",
+            "using connection string: postgres://app:@db:5432/prod"
+          ]
+        },
+        {
+          "tab": "Secret",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get secret db-creds -o yaml",
+            "data:",
+            "  password: c2VjcmV0UGFzcw==   # base64 of secretPass"
+          ]
+        },
+        {
+          "tab": "Deployment",
+          "kind": "yaml",
+          "lines": [
+            "env:",
+            "- name: DB_PASSWORD",
+            "  valueFrom:",
+            "    secretKeyRef:",
+            "      name: database-secret   # wrong name",
+            "      key: db_password         # wrong key"
+          ]
+        }
+      ],
+      "hint": "The Secret is named db-creds and its key is password \u2014 not database-secret / db_password.",
+      "intro": "Fix the Secret reference so the pod picks up DB_PASSWORD correctly:",
+      "template": [
+        "env:",
+        "  - name: DB_PASSWORD",
+        "    valueFrom:",
+        "      secretKeyRef:",
+        "        name: [blank 1]",
+        "        key:  [blank 2]"
+      ],
+      "blanks": [
+        {
+          "answer": "db-creds",
+          "label": "[blank 1] \u2014 Secret name",
+          "placeholder": "e.g. my-secret"
+        },
+        {
+          "answer": "password",
+          "label": "[blank 2] \u2014 Key name",
+          "placeholder": "e.g. my-key"
+        }
+      ]
+    },
+    {
+      "mission": "Three env vars all fail to load. Each references a different source. Fix all three names so the app starts correctly.",
+      "evidence": [
+        {
+          "tab": "App errors",
+          "kind": "term",
+          "lines": [
+            "$ kubectl logs app-0 | grep \"not found\"",
+            "WARN  LOG_LEVEL not found \u2014 using ERROR",
+            "WARN  DB_PASSWORD not found \u2014 skipping auth",
+            "WARN  API_KEY not found \u2014 disabling external calls"
+          ]
+        },
+        {
+          "tab": "Resources",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get cm,secret",
+            "NAME              DATA",
+            "configmap/app-config  2",
+            "secret/db-creds       1",
+            "secret/api-credentials 1"
+          ]
+        },
+        {
+          "tab": "Deployment",
+          "kind": "yaml",
+          "lines": [
+            "# All three names below are wrong:",
+            "configMapKeyRef:",
+            "  name: app-settings       # [blank 1]",
+            "secretKeyRef (DB):",
+            "  name: database-creds     # [blank 2]",
+            "secretKeyRef (API):",
+            "  name: api-keys           # [blank 3]"
+          ]
+        }
+      ],
+      "hint": "The three correct source names are: app-config (ConfigMap), db-creds (Secret), api-credentials (Secret).",
+      "intro": "Fill in all three source names to wire up the environment variables:",
+      "template": [
+        "# LOG_LEVEL from ConfigMap:",
+        "  configMapKeyRef:",
+        "    name: [blank 1]",
+        "",
+        "# DB_PASSWORD from Secret:",
+        "  secretKeyRef:",
+        "    name: [blank 2]",
+        "",
+        "# API_KEY from Secret:",
+        "  secretKeyRef:",
+        "    name: [blank 3]"
+      ],
+      "blanks": [
+        {
+          "answer": "app-config",
+          "label": "[blank 1] \u2014 ConfigMap name",
+          "placeholder": "configmap name"
+        },
+        {
+          "answer": "db-creds",
+          "label": "[blank 2] \u2014 DB Secret name",
+          "placeholder": "secret name"
+        },
+        {
+          "answer": "api-credentials",
+          "label": "[blank 3] \u2014 API Secret name",
+          "placeholder": "secret name"
+        }
+      ]
+    }
+  ]
+}

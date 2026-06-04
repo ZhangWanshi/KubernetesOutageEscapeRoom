@@ -1,0 +1,178 @@
+{
+  "type": "drag-match",
+  "levels": [
+    {
+      "mission": "The team is onboarding. Before touching the cluster, prove you can map the four core Kubernetes building blocks to what they actually do.",
+      "evidence": [
+        {
+          "tab": "Cluster objects",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get all -n production",
+            "NAME                    READY   STATUS",
+            "pod/web-7c9f-2xk4       1/1     Running",
+            "deployment.apps/web     3/3     available",
+            "service/web-svc         ClusterIP  10.96.0.1"
+          ]
+        },
+        {
+          "tab": "Config objects",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get cm,secret -n production",
+            "NAME                  DATA",
+            "configmap/app-config  3",
+            "secret/db-creds       2"
+          ]
+        },
+        {
+          "tab": "Reference",
+          "kind": "yaml",
+          "lines": [
+            "# Core K8s object hierarchy:",
+            "Deployment  \u2192 manages pods",
+            "Service     \u2192 exposes pods",
+            "ConfigMap   \u2192 non-sensitive config",
+            "Secret      \u2192 sensitive credentials"
+          ]
+        }
+      ],
+      "hint": "A Service provides network access, a Deployment manages lifecycle, ConfigMap stores config, Secret stores secrets.",
+      "intro": "Match each Kubernetes object to its purpose:",
+      "pairs": [
+        {
+          "term": "Deployment",
+          "definition": "Manages rolling updates and maintains the desired number of pod replicas"
+        },
+        {
+          "term": "Service",
+          "definition": "Provides a stable network endpoint and load-balances traffic across matching pods"
+        },
+        {
+          "term": "ConfigMap",
+          "definition": "Stores non-sensitive configuration data consumed by pods as env vars or volume files"
+        },
+        {
+          "term": "Secret",
+          "definition": "Stores sensitive data like passwords and tokens in an obfuscated, base64-encoded form"
+        }
+      ]
+    },
+    {
+      "mission": "A new engineer is debugging networking and storage issues. They need to identify which object controls which layer of the cluster.",
+      "evidence": [
+        {
+          "tab": "Networking",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get ingress,hpa -n production",
+            "NAME               CLASS    HOSTS",
+            "ingress/web-ingress nginx   app.example.com",
+            "",
+            "NAME          REFERENCE          TARGETS",
+            "hpa/web-hpa   Deployment/web     45%/70%"
+          ]
+        },
+        {
+          "tab": "Storage",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get pvc -n production",
+            "NAME           STATUS   VOLUME     CAPACITY",
+            "data-pvc       Bound    pv-data    20Gi"
+          ]
+        },
+        {
+          "tab": "Namespaces",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get namespaces",
+            "NAME         STATUS   AGE",
+            "production   Active   30d",
+            "staging      Active   30d",
+            "monitoring   Active   15d"
+          ]
+        }
+      ],
+      "hint": "Ingress handles HTTP routing, HPA auto-scales pods, PVC requests storage, Namespace isolates workloads.",
+      "intro": "Match each networking and storage object to what it controls:",
+      "pairs": [
+        {
+          "term": "Namespace",
+          "definition": "Divides a cluster into isolated virtual sub-clusters for separate teams or environments"
+        },
+        {
+          "term": "PersistentVolumeClaim",
+          "definition": "A request for storage that binds to a PersistentVolume provisioned by the cluster"
+        },
+        {
+          "term": "Ingress",
+          "definition": "Routes external HTTP/HTTPS traffic to Services based on hostname or URL path rules"
+        },
+        {
+          "term": "HorizontalPodAutoscaler",
+          "definition": "Automatically adjusts pod replica count based on CPU, memory, or custom metrics"
+        }
+      ]
+    },
+    {
+      "mission": "The SRE team is auditing advanced workload types. Match all five specialised controllers to their operational purpose.",
+      "evidence": [
+        {
+          "tab": "Workloads",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get statefulset,daemonset,job -n production",
+            "NAME                    READY",
+            "statefulset/postgres    3/3",
+            "daemonset/log-agent     8/8",
+            "job/db-migrate          1/1 (Completed)"
+          ]
+        },
+        {
+          "tab": "CronJobs",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get cronjob -n production",
+            "NAME            SCHEDULE    LAST SCHEDULE",
+            "cleanup-job     0 2 * * *   2h ago"
+          ]
+        },
+        {
+          "tab": "LimitRange",
+          "kind": "term",
+          "lines": [
+            "$ kubectl describe limitrange default-limits",
+            "Type       Resource  Default Request  Default Limit",
+            "Container  cpu       100m             500m",
+            "Container  memory    128Mi            512Mi"
+          ]
+        }
+      ],
+      "hint": "StatefulSet = ordered stable pods, DaemonSet = every node, Job = one-shot task, CronJob = scheduled, LimitRange = default resource caps.",
+      "intro": "Match each advanced Kubernetes controller to its purpose:",
+      "pairs": [
+        {
+          "term": "StatefulSet",
+          "definition": "Manages pods with stable network identity and ordered, persistent storage \u2014 ideal for databases"
+        },
+        {
+          "term": "DaemonSet",
+          "definition": "Ensures exactly one pod runs on every node in the cluster \u2014 used for log agents and monitors"
+        },
+        {
+          "term": "Job",
+          "definition": "Runs pods to successful completion for one-off batch tasks such as migrations or report generation"
+        },
+        {
+          "term": "CronJob",
+          "definition": "Creates Jobs automatically on a repeating cron schedule \u2014 for backups, reports, and cleanup tasks"
+        },
+        {
+          "term": "LimitRange",
+          "definition": "Enforces default resource request and limit policies for all containers in a namespace"
+        }
+      ]
+    }
+  ]
+}

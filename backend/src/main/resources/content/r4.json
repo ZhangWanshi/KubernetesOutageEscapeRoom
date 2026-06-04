@@ -1,0 +1,130 @@
+{
+  "type": "sequence",
+  "levels": [
+    {
+      "mission": "The API service is running but returns no traffic. Arrange the troubleshooting steps in the correct order to find and fix the broken Service selector.",
+      "evidence": [
+        {
+          "tab": "Endpoints",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get endpoints api-svc",
+            "NAME      ENDPOINTS   AGE",
+            "api-svc   <none>      9m"
+          ]
+        },
+        {
+          "tab": "Pod labels",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get pods --show-labels",
+            "api-5d8c   1/1   Running   app=game-api",
+            "api-4f7a   1/1   Running   app=game-api"
+          ]
+        },
+        {
+          "tab": "Service spec",
+          "kind": "yaml",
+          "lines": [
+            "# svc api-svc",
+            "spec:",
+            "  selector:",
+            "    app: api    # does not match pods (game-api)"
+          ]
+        }
+      ],
+      "hint": "Empty endpoints = no pod matched. Always verify endpoints first, then trace back to labels vs selector.",
+      "intro": "Arrange the four steps in the correct debugging order:",
+      "steps": [
+        "Check endpoints: kubectl get endpoints api-svc \u2014 confirm none are listed",
+        "Inspect pod labels: kubectl get pods --show-labels \u2014 note the actual label values",
+        "Compare the Service selector field to the pod labels to find the mismatch",
+        "Patch the Service selector to match the pod labels: kubectl edit svc api-svc"
+      ]
+    },
+    {
+      "mission": "A bad deployment is serving 500 errors. You need to roll back to the last healthy revision. Arrange the correct rollback workflow.",
+      "evidence": [
+        {
+          "tab": "Rollout",
+          "kind": "term",
+          "lines": [
+            "$ kubectl rollout status deploy/web",
+            "Waiting for rollout: 1 of 3 updated replicas available...",
+            "web-2-9fd   0/1   Running   readiness: failing"
+          ]
+        },
+        {
+          "tab": "Readiness",
+          "kind": "term",
+          "lines": [
+            "$ kubectl describe pod web-2-9fd | grep -A1 Readiness",
+            "Readiness probe failed: HTTP 500 on /healthz",
+            "Image:  web:2.1.0"
+          ]
+        },
+        {
+          "tab": "History",
+          "kind": "term",
+          "lines": [
+            "$ kubectl rollout history deploy/web",
+            "REVISION  CHANGE-CAUSE",
+            "3         web:2.0.5  (healthy, 6d)",
+            "4         web:2.1.0  (current, failing)"
+          ]
+        }
+      ],
+      "hint": "Always confirm the failure before rolling back. Check history to know which revision is stable, then undo.",
+      "intro": "Arrange the five rollback steps in the correct sequence:",
+      "steps": [
+        "Confirm the rollout is stuck: kubectl rollout status deploy/web",
+        "View history to identify the last healthy revision: kubectl rollout history deploy/web",
+        "Describe a failing pod to read the readiness probe error message",
+        "Execute the rollback to the previous revision: kubectl rollout undo deploy/web",
+        "Verify recovery: kubectl rollout status deploy/web confirms success"
+      ]
+    },
+    {
+      "mission": "A pod is in CrashLoopBackOff. No one knows why. Arrange the full debugging workflow from identification to verified fix.",
+      "evidence": [
+        {
+          "tab": "Pod status",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get pods",
+            "NAME       READY   STATUS             RESTARTS",
+            "app-0      0/1     CrashLoopBackOff   8 (3m ago)"
+          ]
+        },
+        {
+          "tab": "Last state",
+          "kind": "term",
+          "lines": [
+            "$ kubectl describe pod app-0 | grep -A2 \"Last State\"",
+            "Last State: Terminated",
+            "  Reason: Error  Exit Code: 1"
+          ]
+        },
+        {
+          "tab": "Events",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get events --field-selector=involvedObject.name=app-0",
+            "Warning  BackOff  Back-off restarting failed container",
+            "Normal   Started  Started container app"
+          ]
+        }
+      ],
+      "hint": "Always read --previous logs first \u2014 they contain the actual crash reason before the container is replaced.",
+      "intro": "Arrange the six CrashLoopBackOff debugging steps in order:",
+      "steps": [
+        "Identify the failing pod name: kubectl get pods",
+        "Read the last crash output: kubectl logs app-0 --previous",
+        "Inspect events and probe config: kubectl describe pod app-0",
+        "Determine the root cause from logs and events (env var, image, or resource issue)",
+        "Apply the targeted fix to the Deployment spec and trigger a rollout",
+        "Confirm recovery: kubectl rollout status deploy/app \u2014 wait for all replicas to reach Running"
+      ]
+    }
+  ]
+}

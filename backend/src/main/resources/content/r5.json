@@ -1,0 +1,156 @@
+{
+  "type": "command",
+  "levels": [
+    {
+      "mission": "A bad deployment is live in production. Build the exact kubectl command that rolls it back to the previous revision.",
+      "evidence": [
+        {
+          "tab": "Failing deploy",
+          "kind": "term",
+          "lines": [
+            "$ kubectl rollout status deploy/api-service -n production",
+            "Waiting for rollout to finish: 0 of 3 replicas available",
+            "(readiness probe failing for 4 minutes)"
+          ]
+        },
+        {
+          "tab": "History",
+          "kind": "term",
+          "lines": [
+            "$ kubectl rollout history deploy/api-service -n production",
+            "REVISION  CHANGE-CAUSE",
+            "5         api:1.4.0  (healthy, 3d)",
+            "6         api:1.5.0  (current, failing)"
+          ]
+        },
+        {
+          "tab": "Target command",
+          "kind": "yaml",
+          "lines": [
+            "# Undo to previous revision:",
+            "# kubectl rollout undo deployment/api-service -n production",
+            "",
+            "# Tokens: kubectl  rollout  undo",
+            "#         deployment/api-service  -n  production"
+          ]
+        }
+      ],
+      "hint": "The command is: kubectl rollout undo deployment/api-service -n production",
+      "intro": "Drag the tokens into the correct order to build the rollback command:",
+      "parts": [
+        "kubectl",
+        "rollout",
+        "undo",
+        "deployment/api-service",
+        "-n",
+        "production"
+      ]
+    },
+    {
+      "mission": "The staging deployment needs to be reduced from 10 replicas to 3 to free up cluster resources. Build the correct scale command.",
+      "evidence": [
+        {
+          "tab": "Current state",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get deploy/web -n staging",
+            "NAME   READY   UP-TO-DATE   AVAILABLE",
+            "web    10/10   10           10"
+          ]
+        },
+        {
+          "tab": "Node pressure",
+          "kind": "metrics",
+          "rows": [
+            [
+              "CPU used (staging)",
+              "87%",
+              "err"
+            ],
+            [
+              "Memory used",
+              "79%",
+              "warn"
+            ],
+            [
+              "Pods scheduled",
+              "10 / 10 max",
+              "warn"
+            ],
+            [
+              "Target replicas",
+              "3",
+              "ok"
+            ]
+          ]
+        },
+        {
+          "tab": "Target command",
+          "kind": "yaml",
+          "lines": [
+            "# Scale to 3 replicas:",
+            "# kubectl scale deployment/web --replicas=3 -n staging",
+            "",
+            "# Tokens: kubectl  scale  deployment/web",
+            "#         --replicas=3  -n  staging"
+          ]
+        }
+      ],
+      "hint": "The command is: kubectl scale deployment/web --replicas=3 -n staging",
+      "intro": "Drag the tokens into the correct order to scale the deployment:",
+      "parts": [
+        "kubectl",
+        "scale",
+        "deployment/web",
+        "--replicas=3",
+        "-n",
+        "staging"
+      ]
+    },
+    {
+      "mission": "A hotfix image is ready. You need to update the running deployment to the new image without a full YAML edit. Build the set image command.",
+      "evidence": [
+        {
+          "tab": "Current image",
+          "kind": "term",
+          "lines": [
+            "$ kubectl get deploy/api-service -n production -o jsonpath=\"{..image}\"",
+            "registry.internal/api:v2.0",
+            "(current \u2014 has the memory leak bug)"
+          ]
+        },
+        {
+          "tab": "New image",
+          "kind": "term",
+          "lines": [
+            "$ docker images registry.internal/api",
+            "REPOSITORY               TAG",
+            "registry.internal/api    v2.1   (patched)"
+          ]
+        },
+        {
+          "tab": "Target command",
+          "kind": "yaml",
+          "lines": [
+            "# Update container image inline:",
+            "# kubectl set image deployment/api-service api=api:v2.1 -n production",
+            "",
+            "# Tokens: kubectl  set  image",
+            "#         deployment/api-service  api=api:v2.1  -n  production"
+          ]
+        }
+      ],
+      "hint": "The command is: kubectl set image deployment/api-service api=api:v2.1 -n production",
+      "intro": "Drag the seven tokens into the correct order:",
+      "parts": [
+        "kubectl",
+        "set",
+        "image",
+        "deployment/api-service",
+        "api=api:v2.1",
+        "-n",
+        "production"
+      ]
+    }
+  ]
+}

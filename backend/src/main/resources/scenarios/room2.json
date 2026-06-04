@@ -5,12 +5,12 @@
   "difficulty": "MEDIUM",
   "failureArea": "Containers / resource limits",
   "timeLimitSeconds": 360,
-  "story": "The metrics pipeline is stranded in a resource desert. The pod starts, then dies whenever telemetry volume rises. Find the resource problem before observability is lost.",
+  "story": "The metrics pipeline is stranded in a resource desert. The pod starts, then dies whenever telemetry volume rises.",
   "evidence": [
     {
       "type": "POD_STATUS",
       "title": "Pod Status",
-      "content": "metrics-aggregator pod is in CrashLoopBackOff.\nLast State: Terminated.\nReason: OOMKilled."
+      "content": "metrics-aggregator-7c9d8f: CrashLoopBackOff\nLast State: Terminated\nReason: OOMKilled\nExit Code: 137"
     },
     {
       "type": "METRIC",
@@ -25,7 +25,7 @@
     {
       "type": "LOG",
       "title": "Aggregator Logs",
-      "content": "INFO Loaded 50000 metric samples\nWARN Heap pressure above 90%\nERROR Process terminated by kernel"
+      "content": "INFO Loaded 50000 metric samples\nWARN Heap pressure above 90%\nERROR Process terminated before batch flush"
     },
     {
       "type": "K8S_EVENT",
